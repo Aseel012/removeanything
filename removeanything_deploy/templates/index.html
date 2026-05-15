@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}RemoveAnything — Remove Watermarks &amp; Backgrounds Instantly{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag anim-up" data-i18n="idx_hero_tag">AI-Powered · Free · Private</div>
+    <h1 class="display anim-up-1">Remove<br><em style="color:var(--blue);font-style:normal">Anything.</em></h1>
+    <p class="hero-sub anim-up-2" data-i18n="idx_hero_sub">Backgrounds, AI watermarks — gone in seconds. No quality loss, zero data stored.</p>
+    <div class="hero-pills anim-up-2">
+      <span class="pill hi" data-i18n="idx_pill1">3 free tries</span>
+      <span class="pill" data-i18n="idx_pill2">Free account = unlimited</span>
+      <span class="pill" data-i18n="idx_pill3">Zero data stored</span>
+    </div>
+  </div>
+
+  <!-- TOOL GRID -->
+  <div class="tools-grid">
+    <a class="tool-tile" href="/bg-remover">
+      <div class="tool-tile-label" data-i18n="tile_bg_label">Background</div>
+      <div class="tool-tile-title" data-i18n="tile_bg_title">BG Remover</div>
+      <div class="tool-tile-desc" data-i18n="tile_bg_desc">AI removes backgrounds from any image. Transparent, white, or black output.</div>
+    </a>
+    <a class="tool-tile" href="/nano-banana">
+      <div class="tool-tile-label" data-i18n="tile_nano_label">Watermark</div>
+      <div class="tool-tile-title" data-i18n="tile_nano_title">Nano Banana</div>
+      <div class="tool-tile-desc" data-i18n="tile_nano_desc">Removes the Nano AI bottom banner from images using smart inpainting.</div>
+    </a>
+    <div class="tool-tile" style="border-style:dashed;opacity:.5;cursor:default;">
+      <div class="tool-tile-label" data-i18n="tile_soon_label">Coming soon</div>
+      <div class="tool-tile-title" data-i18n="tile_soon_title">More Tools</div>
+      <div class="tool-tile-desc" data-i18n="tile_soon_desc">Midjourney, DALL·E, Ideogram watermark removal — in progress.</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <div class="wrap">
+      <div class="section-tag" data-i18n="idx_how_tag">How it works</div>
+      <h2 class="display section-title"><span data-i18n="idx_how_h2a">Three steps.</span> <em data-i18n="idx_how_h2b">Seconds.</em></h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-num" data-i18n="idx_step1_num">Step 01</span>
+          <div class="step-title" data-i18n="idx_step1_title">Upload Your Image</div>
+          <div class="step-desc" data-i18n="idx_step1_desc">Drop, paste, or browse. Up to 20 MB. No account needed to start.</div>
+        </div>
+        <div class="step-card">
+          <span class="step-num" data-i18n="idx_step2_num">Step 02</span>
+          <div class="step-title" data-i18n="idx_step2_title">AI Does the Work</div>
+          <div class="step-desc" data-i18n="idx_step2_desc">Our engine detects and removes watermarks or backgrounds automatically.</div>
+        </div>
+        <div class="step-card">
+          <span class="step-num" data-i18n="idx_step3_num">Step 03</span>
+          <div class="step-title" data-i18n="idx_step3_title">Download Result</div>
+          <div class="step-desc" data-i18n="idx_step3_desc">Full-resolution PNG, zero quality loss, ready for any use case.</div>
+        </div>
+        <div class="step-card">
+          <span class="step-num" data-i18n="idx_step4_num">Step 04</span>
+          <div class="step-title" data-i18n="idx_step4_title">Always Free</div>
+          <div class="step-desc" data-i18n="idx_step4_desc">3 free tries with no account. Sign in with Google for unlimited — no card ever.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section">
+    <div class="wrap">
+      <div class="section-tag" data-i18n="idx_feat_tag">Why RemoveAnything</div>
+      <h2 class="display section-title"><span data-i18n="idx_feat_h2a">Built for</span> <em data-i18n="idx_feat_h2b">real use.</em></h2>
+      <div class="feat-grid">
+        <div class="feat-card dark">
+          <div class="feat-title" data-i18n="feat1_title">Free. Always.</div>
+          <div class="feat-desc" data-i18n="feat1_desc">No credit card, no subscription, no expiry. Sign in with Google for unlimited — forever.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-title" data-i18n="feat2_title">Under 5 seconds</div>
+          <div class="feat-desc" data-i18n="feat2_desc">AI-powered processing. No queues, no waiting, no fake progress bars.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-title" data-i18n="feat3_title">Zero data stored</div>
+          <div class="feat-desc" data-i18n="feat3_desc">Images are processed in memory and discarded immediately. Nothing written to disk.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-title" data-i18n="feat4_title">Full-res output</div>
+          <div class="feat-desc" data-i18n="feat4_desc">Export at original resolution as lossless PNG. No compression, no quality loss.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-title" data-i18n="feat5_title">API Access</div>
+          <div class="feat-desc" data-i18n="feat5_desc">Generate API keys from your account to integrate RemoveAnything into your apps.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-title" data-i18n="feat6_title">12 Languages</div>
+          <div class="feat-desc" data-i18n="feat6_desc">Interface available in English, Hindi, Arabic, Spanish, French, German, Chinese, Japanese, and more.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <div class="wrap">
+      <div class="section-tag" data-i18n="faq_tag">FAQ</div>
+      <h2 class="display section-title"><span data-i18n="faq_h2a">Common</span> <em data-i18n="faq_h2b">Questions</em></h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq1_q">Is RemoveAnything really free?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n="faq1_a">Yes. 3 free processings with no account. Sign in with Google for unlimited — no credit card, no subscription, no hidden fees. Ever.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq2_q">Why Google sign-in only?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n="faq2_a">Google sign-in is the fastest, most secure way to create an account. No passwords to forget, no email verification needed — one click and you're in.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq3_q">Are my images stored on your servers?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n="faq3_a">No. All images are processed in memory and immediately discarded. We never write anything to disk. Zero data stored — always.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq4_q">What watermarks can you remove?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n="faq4_a">Nano Banana (Nano AI) bottom banner watermarks. More AI tools including Midjourney and DALL·E coming soon.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq5_q">Can I use RemoveAnything via API?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n-html="faq5_a">Yes! Sign in with Google, then click "API Keys" in the nav bar to generate your personal API keys. Send requests with an <code>X-API-Key</code> header.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span data-i18n="faq6_q">What image formats are supported?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-body" data-i18n="faq6_a">PNG, JPG/JPEG, WebP, BMP, and TIFF. Output is always full-resolution PNG.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

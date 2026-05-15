@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{% block title %}RemoveAnything — AI Watermark &amp; Background Remover{% endblock %}</title>
+<meta name="description" content="{% block desc %}Remove backgrounds and Nano Banana watermarks instantly. Free, private.{% endblock %}">
+<link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+<style>
+/* ═══════════ LANGUAGE SELECTOR ═══════════ */
+.lang-wrap{position:relative;display:inline-flex;align-items:center}
+.lang-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--gray);cursor:pointer;transition:all .15s;white-space:nowrap}
+.lang-btn:hover{border-color:var(--blue);color:var(--black)}
+.lang-btn svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8}
+.lang-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;bottom:auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);min-width:200px;z-index:9999;overflow:hidden;animation:fadeDown .15s ease}
+.lang-panel.open{display:block}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.lang-filter{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--border2)}
+.lang-filter svg{width:12px;height:12px;flex-shrink:0;stroke:var(--gray-l);fill:none;stroke-width:1.8}
+.lang-filter input{flex:1;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--black);background:transparent;min-width:0}
+.lang-filter input::placeholder{color:var(--gray-l)}
+.lang-list{max-height:240px;overflow-y:auto;scroll-behavior:smooth}
+.lang-opt{display:flex;align-items:center;gap:9px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--black);transition:background .1s;user-select:none}
+.lang-opt:hover{background:var(--surface2)}
+.lang-opt.active{color:var(--blue);font-weight:600;background:var(--blue-l)}
+.lang-opt.hidden{display:none}
+.lang-flag{font-size:15px;line-height:1;flex-shrink:0}
+.lang-name{flex:1}
+.lang-no-results{padding:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)}
+
+/* ═══════════ GOOGLE SIGN-IN BUTTON ═══════════ */
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;background:#fff;border:1.5px solid #dadce0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#3c4043;cursor:pointer;transition:all .15s}
+.google-btn:hover{background:#f8f9fa;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.google-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* ═══════════ API KEYS MODAL ═══════════ */
+.apikeys-modal{max-width:500px;width:calc(100vw - 32px)}
+.apikeys-header{margin-bottom:16px}
+.apikeys-header-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-l);margin-top:2px}
+.apikeys-list-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:60px}
+.apikey-row{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--border2)}
+.apikey-row:last-child{border-bottom:none}
+.apikey-left{flex:1;min-width:0}
+.apikey-name{font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apikey-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray-l);margin-top:2px}
+.apikey-preview{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);white-space:nowrap}
+.apikey-del{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--gray-l);font-size:15px;transition:all .15s}
+.apikey-del:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.apikeys-create-row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.apikeys-create-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;background:var(--surface);min-width:0}
+.apikeys-create-row input:focus{border-color:var(--blue)}
+.apikeys-create-btn{flex-shrink:0;padding:10px 16px;background:var(--black);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.apikeys-create-btn:hover{background:#1c1c1a}
+.apikeys-hint{font-size:11px;color:var(--gray-l);font-family:'IBM Plex Mono',monospace;line-height:1.7;background:var(--surface2);border-radius:8px;padding:10px 12px}
+.apikeys-hint code{background:var(--surface);padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+.new-key-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.new-key-val{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#15803d;word-break:break-all;margin-bottom:8px}
+.new-key-warn{font-size:11px;color:#dc2626;font-family:'DM Sans',sans-serif;font-weight:500;margin-bottom:8px}
+.new-key-copy{width:100%;padding:8px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s}
+.new-key-copy:hover{background:#15803d}
+.apikeys-empty{padding:24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)}
+.apikeys-loading{padding:24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)}
+.apikeys-error{padding:16px;background:var(--red-l);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--red);margin-bottom:12px;text-align:center}
+
+/* ═══════════ MOBILE NAV ADJUSTMENTS ═══════════ */
+@media(max-width:640px){
+  .lang-panel{right:auto;left:0;min-width:180px;top:calc(100% + 8px)}
+  .lang-btn span.lang-label{display:none}
+  nav .nav-right{gap:6px}
+  nav .btn-ghost{display:none}
+}
+@media(max-width:400px){
+  .lang-btn{padding:5px 7px}
+}
+</style>
+{% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav>
+  <a class="logo" href="/">remove<em>anything</em></a>
+  <div class="nav-center">
+    <a class="ntab" href="/" data-path="/"><span data-i18n="nav_home">Home</span></a>
+    <a class="ntab" href="/bg-remover" data-path="/bg-remover"><span data-i18n="nav_bg">BG Remover</span></a>
+    <a class="ntab" href="/nano-banana" data-path="/nano-banana"><span data-i18n="nav_nano">Nano Banana</span></a>
+  </div>
+  <div class="nav-right">
+    <div class="status-dot" id="status-dot"></div>
+
+    <!-- Language Selector -->
+    <div class="lang-wrap" id="lang-wrap">
+      <button class="lang-btn" id="lang-btn" onclick="RA.toggleLangPanel(event)" aria-label="Select language">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="lang-flag-display">🇺🇸</span>
+        <span class="lang-label" id="lang-code-display">EN</span>
+      </button>
+      <div class="lang-panel" id="lang-panel">
+        <div class="lang-filter">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="lang-search-input" placeholder="Type to filter…" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="lang-list" id="lang-list">
+          <div class="lang-opt" data-lang="en" data-search="english en"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span></div>
+          <div class="lang-opt" data-lang="hi" data-search="hindi hi indian india"><span class="lang-flag">🇮🇳</span><span class="lang-name">हिंदी</span></div>
+          <div class="lang-opt" data-lang="ar" data-search="arabic ar arabic saudi"><span class="lang-flag">🇸🇦</span><span class="lang-name">العربية</span></div>
+          <div class="lang-opt" data-lang="es" data-search="spanish es espanol spain"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span></div>
+          <div class="lang-opt" data-lang="fr" data-search="french fr francais france"><span class="lang-flag">🇫🇷</span><span class="lang-name">Français</span></div>
+          <div class="lang-opt" data-lang="de" data-search="german de deutsch germany"><span class="lang-flag">🇩🇪</span><span class="lang-name">Deutsch</span></div>
+          <div class="lang-opt" data-lang="zh" data-search="chinese zh china mandarin"><span class="lang-flag">🇨🇳</span><span class="lang-name">中文</span></div>
+          <div class="lang-opt" data-lang="ja" data-search="japanese ja japan nihongo"><span class="lang-flag">🇯🇵</span><span class="lang-name">日本語</span></div>
+          <div class="lang-opt" data-lang="pt" data-search="portuguese pt brazil brasil"><span class="lang-flag">🇧🇷</span><span class="lang-name">Português</span></div>
+          <div class="lang-opt" data-lang="ru" data-search="russian ru russia russkiy"><span class="lang-flag">🇷🇺</span><span class="lang-name">Русский</span></div>
+          <div class="lang-opt" data-lang="ko" data-search="korean ko korea hangul"><span class="lang-flag">🇰🇷</span><span class="lang-name">한국어</span></div>
+          <div class="lang-opt" data-lang="tr" data-search="turkish tr turkey turkce"><span class="lang-flag">🇹🇷</span><span class="lang-name">Türkçe</span></div>
+        </div>
+        <div class="lang-no-results" id="lang-no-results" style="display:none">No match</div>
+      </div>
+    </div>
+
+    <button class="btn-ghost" id="nav-apikey" onclick="RA.openApiKeys()" style="display:none"><span data-i18n="nav_api">API Keys</span></button>
+    <button class="btn-ghost" id="nav-login" onclick="RA.openAuth()"><span data-i18n="nav_login">Log in</span></button>
+    <button class="btn-primary" id="nav-signup" onclick="RA.openAuth()"><span data-i18n="nav_signup">Sign up</span></button>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="foot-logo">remove<em>anything</em>.in</div>
+  <div class="foot-copy">Free · Private · Instant</div>
+</footer>
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════ LOGOUT OVERLAY ═══════ -->
+<div class="overlay" id="logout-overlay">
+  <div class="logout-box">
+    <div class="logout-title" data-i18n="logout_title">Log out?</div>
+    <div class="logout-sub" id="logout-sub">You'll lose your session.</div>
+    <div class="logout-btns">
+      <button class="lbtn cancel" onclick="RA.closeLogout()" data-i18n="cancel">Cancel</button>
+      <button class="lbtn danger" onclick="RA.doLogout()" data-i18n="logout_btn">Log out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ AUTH MODAL — Google Only ═══════ -->
+<div class="overlay" id="auth-overlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="RA.closeAuth()">×</button>
+    <div class="modal-logo">remove<em>anything</em></div>
+    <div class="modal-sub">Free forever · No credit card needed</div>
+    <div id="modal-notice" class="modal-notice">Sign in with Google for unlimited access.</div>
+
+    <button class="google-btn" id="btn-google-signin" onclick="RA.signInGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.5 1.2 8.9 3.2l6.6-6.6C35.3 2.5 30 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.7 6C12.3 13.3 17.7 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.2-9.4 6.2-16.2z"/>
+        <path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.7-6A23.9 23.9 0 0 0 0 24c0 3.8.9 7.4 2.7 10.7l7.7-6z"/>
+        <path fill="#34A853" d="M24 48c6 0 11-2 14.7-5.4l-7-5.4c-2 1.3-4.5 2.1-7.7 2.1-6.3 0-11.7-3.8-13.6-9.2l-7.7 6C6.6 42.6 14.6 48 24 48z"/>
+      </svg>
+      <span data-i18n="btn_google">Continue with Google</span>
+    </button>
+
+    <div id="modal-err" class="modal-error" style="display:none"></div>
+    <div id="modal-spin" style="display:none;text-align:center;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)">
+      <span style="display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></span>Signing in…
+    </div>
+    <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--gray-l);font-family:'IBM Plex Mono',monospace">Google sign-in only · Instant · No password</div>
+  </div>
+</div>
+
+<!-- ═══════ API KEYS MODAL ═══════ -->
+<div class="overlay" id="apikeys-overlay">
+  <div class="modal apikeys-modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="RA.closeApiKeys()">×</button>
+    <div class="apikeys-header">
+      <div class="modal-logo" style="margin-bottom:2px">remove<em>anything</em></div>
+      <div class="apikeys-header-title">API Keys</div>
+    </div>
+
+    <div id="new-key-banner" class="new-key-banner" style="display:none">
+      <div class="new-key-warn">⚠ Copy this key now — it won't be shown again</div>
+      <div class="new-key-val" id="new-key-val"></div>
+      <button class="new-key-copy" onclick="RA.copyNewKey()">Copy Key to Clipboard</button>
+    </div>
+
+    <div class="apikeys-list-box" id="apikeys-list-box">
+      <div class="apikeys-loading" id="apikeys-status">Loading…</div>
+    </div>
+
+    <div class="apikeys-create-row">
+      <input type="text" id="apikey-name-inp" placeholder="Key name e.g. My App" maxlength="60">
+      <button class="apikeys-create-btn" onclick="RA.createApiKey()">+ New Key</button>
+    </div>
+
+    <div class="apikeys-hint">
+      Send requests with header: <code>X-API-Key: ra_…</code><br>
+      Max 10 keys · Keys are personal · Never share them
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<!-- ═══════════════════════════════════════════════════
+     TRANSLATIONS
+════════════════════════════════════════════════════ -->
+<script>
+var _LANGS = {
+  en:{flag:"🇺🇸",code:"EN"},hi:{flag:"🇮🇳",code:"HI"},ar:{flag:"🇸🇦",code:"AR"},
+  es:{flag:"🇪🇸",code:"ES"},fr:{flag:"🇫🇷",code:"FR"},de:{flag:"🇩🇪",code:"DE"},
+  zh:{flag:"🇨🇳",code:"ZH"},ja:{flag:"🇯🇵",code:"JA"},pt:{flag:"🇧🇷",code:"PT"},
+  ru:{flag:"🇷🇺",code:"RU"},ko:{flag:"🇰🇷",code:"KO"},tr:{flag:"🇹🇷",code:"TR"}
+};
+
+var _T = {
+  en:{
+    nav_home:"Home",nav_bg:"BG Remover",nav_nano:"Nano Banana",nav_login:"Log in",nav_signup:"Sign up",nav_api:"API Keys",
+    btn_google:"Continue with Google",logout_title:"Log out?",cancel:"Cancel",logout_btn:"Log out",
+    toast_signedin:"Signed in — unlimited access!",toast_admin:"Welcome, Admin!",toast_out:"Logged out.",
+    idx_hero_tag:"AI-Powered · Free · Private",idx_hero_sub:"Backgrounds, AI watermarks — gone in seconds. No quality loss, zero data stored.",
+    idx_pill1:"3 free tries",idx_pill2:"Free account = unlimited",idx_pill3:"Zero data stored",
+    tile_bg_label:"Background",tile_bg_title:"BG Remover",tile_bg_desc:"AI removes backgrounds from any image. Transparent, white, or black output.",
+    tile_nano_label:"Watermark",tile_nano_title:"Nano Banana",tile_nano_desc:"Removes the Nano AI bottom banner from images using smart inpainting.",
+    tile_soon_label:"Coming soon",tile_soon_title:"More Tools",tile_soon_desc:"Midjourney, DALL·E, Ideogram watermark removal — in progress.",
+    idx_how_tag:"How it works",idx_how_h2a:"Three steps.",idx_how_h2b:"Seconds.",
+    idx_step1_num:"Step 01",idx_step1_title:"Upload Your Image",idx_step1_desc:"Drop, paste, or browse. Up to 20 MB. No account needed to start.",
+    idx_step2_num:"Step 02",idx_step2_title:"AI Does the Work",idx_step2_desc:"Our engine detects and removes watermarks or backgrounds automatically.",
+    idx_step3_num:"Step 03",idx_step3_title:"Download Result",idx_step3_desc:"Full-resolution PNG, zero quality loss, ready for any use case.",
+    idx_step4_num:"Step 04",idx_step4_title:"Always Free",idx_step4_desc:"3 free tries with no account. Sign in with Google for unlimited — no card ever.",
+    idx_feat_tag:"Why RemoveAnything",idx_feat_h2a:"Built for",idx_feat_h2b:"real use.",
+    feat1_title:"Free. Always.",feat1_desc:"No credit card, no subscription, no expiry. Sign in with Google for unlimited — forever.",
+    feat2_title:"Under 5 seconds",feat2_desc:"AI-powered processing. No queues, no waiting, no fake progress bars.",
+    feat3_title:"Zero data stored",feat3_desc:"Images are processed in memory and discarded immediately. Nothing written to disk.",
+    feat4_title:"Full-res output",feat4_desc:"Export at original resolution as lossless PNG. No compression, no quality loss.",
+    feat5_title:"API Access",feat5_desc:"Generate API keys from your account to integrate RemoveAnything into your apps.",
+    feat6_title:"12 Languages",feat6_desc:"Interface available in English, Hindi, Arabic, Spanish, French, German, Chinese, Japanese, and more.",
+    faq_tag:"FAQ",faq_h2a:"Common",faq_h2b:"Questions",
+    faq1_q:"Is RemoveAnything really free?",faq1_a:"Yes. 3 free processings with no account. Sign in with Google for unlimited — no credit card, no subscription, no hidden fees. Ever.",
+    faq2_q:"Why Google sign-in only?",faq2_a:"Google sign-in is the fastest, most secure way to create an account. No passwords to forget, no email verification needed — one click and you're in.",
+    faq3_q:"Are my images stored on your servers?",faq3_a:"No. All images are processed in memory and immediately discarded. We never write anything to disk. Zero data stored — always.",
+    faq4_q:"What watermarks can you remove?",faq4_a:"Nano Banana (Nano AI) bottom banner watermarks. More AI tools including Midjourney and DALL·E coming soon.",
+    faq5_q:"Can I use RemoveAnything via API?",faq5_a:"Yes! Sign in with Google, then click \"API Keys\" in the nav bar to generate your personal API keys. Send requests with an <code>X-API-Key</code> header.",
+    faq6_q:"What image formats are supported?",faq6_a:"PNG, JPG/JPEG, WebP, BMP, and TIFF. Output is always full-resolution PNG.",
+    bg_hero_tag:"AI Background Removal",bg_hero_h1a:"Background",bg_hero_h1b:"Remover.",
+    bg_hero_sub:"AI removes any background in seconds. Transparent, white, or black output at full resolution.",
+    bg_pill1:"3 free tries",bg_pill2:"Up to 20 MB",bg_pill3:"Lossless PNG",
+    bg_card_title:"Background Remover",bg_live:"live",
+    dz_title:"Drop your image here",dz_sub_pre:"or",dz_sub_browse:"browse files",dz_sub_post:"· paste works too",
+    output_label:"Output:",mode_transparent:"Transparent",mode_white:"White BG",mode_black:"Black BG",
+    tab_compare:"Compare",tab_original:"Original",tab_result:"Result",
+    panel_original:"Original",panel_result:"Result",
+    ph_text:"awaiting processing",overlay_removing_bg:"removing background…",
+    btn_proc_bg:"Remove Background",btn_dl:"Download PNG",btn_new:"New Image",processing:"processing…",
+    hist_label:"Recent",hist_empty:"Nothing yet — drop an image above",
+    bg_how_tag:"How it works",bg_how_h2:"Automatic.",bg_how_h2b:"Precise.",
+    bg_step1_num:"Step 01",bg_step1_title:"Upload any image",bg_step1_desc:"PNG, JPG, WebP, BMP or TIFF up to 20 MB. Drop, paste or browse.",
+    bg_step2_num:"Step 02",bg_step2_title:"AI detects subject",bg_step2_desc:"Deep learning model identifies foreground subject with edge precision.",
+    bg_step3_num:"Step 03",bg_step3_title:"Choose output",bg_step3_desc:"Transparent PNG, solid white, or solid black background — selected before processing.",
+    bg_step4_num:"Step 04",bg_step4_title:"Download result",bg_step4_desc:"Full-resolution lossless PNG. Zero quality loss.",
+    nb_hero_tag:"Gemini Nano AI Watermark",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Remover.",
+    nb_hero_sub:"Removes the Gemini star watermark from Nano AI images using mathematically exact reverse alpha blending — pixel-perfect, zero quality loss.",
+    nb_pill1:"Reverse alpha blend",nb_pill2:"Pixel-perfect",nb_pill3:"Zero quality loss",
+    nb_card_title:"Gemini Nano Banana Watermark Remover",
+    nb_dz_title:"Drop Gemini / Nano AI image here",nb_dz_sub:"or browse files · the Gemini star watermark (bottom-right) will be removed",
+    nb_panel_orig:"Original (with Gemini watermark)",nb_panel_res:"Result (watermark removed)",
+    overlay_removing_nb:"removing Gemini watermark…",
+    btn_proc_nb:"Remove Watermark",nb_proc_stat:"removing watermark…",
+    tab_before:"Before",tab_after:"After",view_before:"Before",view_after:"After",
+    nb_how_tag:"How it works",nb_how_h2a:"Mathematically exact,",nb_how_h2b:"not AI guessing.",
+    nb_step1_num:"Step 01",nb_step1_title:"Upload Gemini / Nano image",nb_step1_desc:"Any image with the Gemini semi-transparent star watermark in the bottom-right corner.",
+    nb_step2_num:"Step 02",nb_step2_title:"Watermark located",nb_step2_desc:"Auto-detected at bottom-right: 48×48px for small images, 96×96px for images over 1024px.",
+    nb_step3_num:"Step 03",nb_step3_title:"Reverse alpha blending",nb_step3_desc:"Exact math: original = (blended − α×255) / (1−α). Recovers the exact original pixels.",
+    nb_step4_num:"Step 04",nb_step4_title:"Pixel-perfect result",nb_step4_desc:"Original pixel values recovered precisely — no inpainting, no guessing, zero quality loss."
+  },
+  hi:{
+    nav_home:"होम",nav_bg:"बैकग्राउंड हटाएं",nav_nano:"नैनो बनाना",nav_login:"लॉग इन",nav_signup:"साइन अप",nav_api:"API कुंजी",
+    btn_google:"Google से जारी रखें",logout_title:"लॉग आउट?",cancel:"रद्द करें",logout_btn:"लॉग आउट",
+    toast_signedin:"साइन इन — असीमित एक्सेस!",toast_admin:"स्वागत, Admin!",toast_out:"लॉग आउट हो गए।",
+    idx_hero_tag:"AI-संचालित · मुफ्त · निजी",idx_hero_sub:"बैकग्राउंड, AI वॉटरमार्क — सेकंड में गायब। गुणवत्ता में कोई नुकसान नहीं, डेटा स्टोर नहीं।",
+    idx_pill1:"3 मुफ्त प्रयास",idx_pill2:"मुफ्त खाता = असीमित",idx_pill3:"डेटा स्टोर नहीं",
+    tile_bg_label:"बैकग्राउंड",tile_bg_title:"BG रिमूवर",tile_bg_desc:"AI किसी भी इमेज से बैकग्राउंड हटाता है। ट्रांसपेरेंट, सफेद या काला आउटपुट।",
+    tile_nano_label:"वॉटरमार्क",tile_nano_title:"नैनो बनाना",tile_nano_desc:"स्मार्ट इनपेंटिंग से Nano AI बॉटम बैनर हटाता है।",
+    tile_soon_label:"जल्द आ रहा है",tile_soon_title:"और टूल्स",tile_soon_desc:"Midjourney, DALL·E, Ideogram वॉटरमार्क रिमूवल — प्रगति में।",
+    idx_how_tag:"यह कैसे काम करता है",idx_how_h2a:"तीन चरण।",idx_how_h2b:"सेकंड।",
+    idx_step1_num:"चरण 01",idx_step1_title:"अपनी इमेज अपलोड करें",idx_step1_desc:"ड्रॉप, पेस्ट या ब्राउज़ करें। 20 MB तक। शुरू करने के लिए खाता जरूरी नहीं।",
+    idx_step2_num:"चरण 02",idx_step2_title:"AI करता है काम",idx_step2_desc:"हमारा इंजन वॉटरमार्क या बैकग्राउंड अपने आप पहचान कर हटाता है।",
+    idx_step3_num:"चरण 03",idx_step3_title:"परिणाम डाउनलोड करें",idx_step3_desc:"फुल-रेज़ोल्यूशन PNG, गुणवत्ता में कोई नुकसान नहीं।",
+    idx_step4_num:"चरण 04",idx_step4_title:"हमेशा मुफ्त",idx_step4_desc:"बिना खाते के 3 मुफ्त प्रयास। असीमित के लिए Google से साइन इन करें।",
+    idx_feat_tag:"RemoveAnything क्यों?",idx_feat_h2a:"बना है",idx_feat_h2b:"असली उपयोग के लिए।",
+    feat1_title:"मुफ्त। हमेशा।",feat1_desc:"कोई क्रेडिट कार्ड नहीं, कोई सब्सक्रिप्शन नहीं। Google से साइन इन करें — हमेशा के लिए।",
+    feat2_title:"5 सेकंड से कम",feat2_desc:"AI-संचालित प्रोसेसिंग। कोई कतार नहीं, कोई प्रतीक्षा नहीं।",
+    feat3_title:"डेटा स्टोर नहीं",feat3_desc:"इमेज मेमोरी में प्रोसेस होती हैं और तुरंत हटा दी जाती हैं।",
+    feat4_title:"फुल-रेज़ आउटपुट",feat4_desc:"मूल रेज़ोल्यूशन पर lossless PNG के रूप में निर्यात करें।",
+    feat5_title:"API एक्सेस",feat5_desc:"अपने खाते से API कुंजी बनाएं।",
+    feat6_title:"12 भाषाएं",feat6_desc:"अंग्रेजी, हिंदी, अरबी, स्पेनिश, फ्रेंच, जर्मन, चीनी, जापानी और अधिक में उपलब्ध।",
+    faq_tag:"अक्सर पूछे जाने वाले प्रश्न",faq_h2a:"सामान्य",faq_h2b:"प्रश्न",
+    faq1_q:"क्या RemoveAnything सच में मुफ्त है?",faq1_a:"हाँ। बिना खाते के 3 मुफ्त प्रोसेसिंग। असीमित के लिए Google से साइन इन करें।",
+    faq2_q:"केवल Google साइन-इन क्यों?",faq2_a:"Google साइन-इन सबसे तेज़ और सुरक्षित तरीका है। कोई पासवर्ड याद नहीं, कोई ईमेल सत्यापन नहीं।",
+    faq3_q:"क्या मेरी इमेज आपके सर्वर पर स्टोर होती हैं?",faq3_a:"नहीं। सभी इमेज मेमोरी में प्रोसेस होती हैं और तुरंत हटा दी जाती हैं।",
+    faq4_q:"आप कौन से वॉटरमार्क हटा सकते हैं?",faq4_a:"Nano Banana (Nano AI) बॉटम बैनर वॉटरमार्क। Midjourney और DALL·E जल्द आ रहे हैं।",
+    faq5_q:"क्या मैं API के माध्यम से उपयोग कर सकता हूं?",faq5_a:"हाँ! Google से साइन इन करें, फिर \"API Keys\" पर क्लिक करें। <code>X-API-Key</code> हेडर के साथ अनुरोध भेजें।",
+    faq6_q:"कौन से इमेज फॉर्मेट समर्थित हैं?",faq6_a:"PNG, JPG/JPEG, WebP, BMP और TIFF। आउटपुट हमेशा फुल-रेज़ोल्यूशन PNG है।",
+    bg_hero_tag:"AI बैकग्राउंड रिमूवल",bg_hero_h1a:"बैकग्राउंड",bg_hero_h1b:"रिमूवर।",
+    bg_hero_sub:"AI सेकंड में कोई भी बैकग्राउंड हटाता है। फुल रेज़ोल्यूशन पर ट्रांसपेरेंट, सफेद या काला आउटपुट।",
+    bg_pill1:"3 मुफ्त प्रयास",bg_pill2:"20 MB तक",bg_pill3:"Lossless PNG",
+    bg_card_title:"बैकग्राउंड रिमूवर",bg_live:"लाइव",
+    dz_title:"यहाँ इमेज ड्रॉप करें",dz_sub_pre:"या",dz_sub_browse:"फाइल ब्राउज़ करें",dz_sub_post:"· पेस्ट भी काम करता है",
+    output_label:"आउटपुट:",mode_transparent:"ट्रांसपेरेंट",mode_white:"सफेद BG",mode_black:"काला BG",
+    tab_compare:"तुलना",tab_original:"मूल",tab_result:"परिणाम",
+    panel_original:"मूल",panel_result:"परिणाम",
+    ph_text:"प्रोसेसिंग की प्रतीक्षा",overlay_removing_bg:"बैकग्राउंड हटाया जा रहा है…",
+    btn_proc_bg:"बैकग्राउंड हटाएं",btn_dl:"PNG डाउनलोड करें",btn_new:"नई इमेज",processing:"प्रोसेसिंग…",
+    hist_label:"हाल ही में",hist_empty:"अभी कुछ नहीं — ऊपर इमेज ड्रॉप करें",
+    bg_how_tag:"यह कैसे काम करता है",bg_how_h2:"स्वचालित।",bg_how_h2b:"सटीक।",
+    bg_step1_num:"चरण 01",bg_step1_title:"कोई भी इमेज अपलोड करें",bg_step1_desc:"20 MB तक PNG, JPG, WebP, BMP या TIFF।",
+    bg_step2_num:"चरण 02",bg_step2_title:"AI विषय पहचानता है",bg_step2_desc:"डीप लर्निंग मॉडल एज प्रेसिज़न के साथ फोरग्राउंड पहचानता है।",
+    bg_step3_num:"चरण 03",bg_step3_title:"आउटपुट चुनें",bg_step3_desc:"ट्रांसपेरेंट PNG, सॉलिड सफेद या काला बैकग्राउंड।",
+    bg_step4_num:"चरण 04",bg_step4_title:"परिणाम डाउनलोड करें",bg_step4_desc:"फुल-रेज़ोल्यूशन lossless PNG। शून्य गुणवत्ता हानि।",
+    nb_hero_tag:"Gemini Nano AI वॉटरमार्क",nb_hero_h1a:"नैनो बनाना",nb_hero_h1b:"रिमूवर।",
+    nb_hero_sub:"गणितीय रिवर्स अल्फा ब्लेंडिंग से Nano AI इमेज का Gemini स्टार वॉटरमार्क हटाता है।",
+    nb_pill1:"रिवर्स अल्फा ब्लेंड",nb_pill2:"पिक्सेल-परफेक्ट",nb_pill3:"शून्य गुणवत्ता हानि",
+    nb_card_title:"Gemini Nano Banana वॉटरमार्क रिमूवर",
+    nb_dz_title:"यहाँ Gemini / Nano AI इमेज ड्रॉप करें",nb_dz_sub:"या फाइल ब्राउज़ करें · Gemini स्टार वॉटरमार्क (नीचे-दाएं) हटाया जाएगा",
+    nb_panel_orig:"मूल (Gemini वॉटरमार्क के साथ)",nb_panel_res:"परिणाम (वॉटरमार्क हटाया गया)",
+    overlay_removing_nb:"Gemini वॉटरमार्क हटाया जा रहा है…",
+    btn_proc_nb:"वॉटरमार्क हटाएं",nb_proc_stat:"वॉटरमार्क हटाया जा रहा है…",
+    tab_before:"पहले",tab_after:"बाद",view_before:"पहले",view_after:"बाद",
+    nb_how_tag:"यह कैसे काम करता है",nb_how_h2a:"गणितीय रूप से सटीक,",nb_how_h2b:"AI अनुमान नहीं।",
+    nb_step1_num:"चरण 01",nb_step1_title:"Gemini / Nano इमेज अपलोड करें",nb_step1_desc:"नीचे-दाएं कोने में Gemini सेमी-ट्रांसपेरेंट स्टार वॉटरमार्क वाली कोई भी इमेज।",
+    nb_step2_num:"चरण 02",nb_step2_title:"वॉटरमार्क का पता लगाया",nb_step2_desc:"नीचे-दाएं पर ऑटो-डिटेक्ट: छोटी इमेज के लिए 48×48px, 1024px से बड़ी इमेज के लिए 96×96px।",
+    nb_step3_num:"चरण 03",nb_step3_title:"रिवर्स अल्फा ब्लेंडिंग",nb_step3_desc:"सटीक गणित: original = (blended − α×255) / (1−α)। मूल पिक्सेल पुनः प्राप्त करता है।",
+    nb_step4_num:"चरण 04",nb_step4_title:"पिक्सेल-परफेक्ट परिणाम",nb_step4_desc:"मूल पिक्सेल मान सटीक रूप से पुनः प्राप्त — कोई इनपेंटिंग नहीं, कोई अनुमान नहीं।"
+  },
+  ar:{
+    nav_home:"الرئيسية",nav_bg:"إزالة الخلفية",nav_nano:"نانو بنانا",nav_login:"تسجيل الدخول",nav_signup:"إنشاء حساب",nav_api:"مفاتيح API",
+    btn_google:"المتابعة مع Google",logout_title:"تسجيل الخروج؟",cancel:"إلغاء",logout_btn:"تسجيل الخروج",
+    toast_signedin:"تم تسجيل الدخول!",toast_admin:"مرحباً يا مسؤول!",toast_out:"تم تسجيل الخروج.",
+    idx_hero_tag:"مدعوم بالذكاء الاصطناعي · مجاني · خاص",idx_hero_sub:"الخلفيات، علامات الذكاء الاصطناعي — تختفي في ثوانٍ.",
+    idx_pill1:"3 محاولات مجانية",idx_pill2:"حساب مجاني = غير محدود",idx_pill3:"لا بيانات مخزنة",
+    tile_bg_label:"خلفية",tile_bg_title:"إزالة الخلفية",tile_bg_desc:"يزيل الذكاء الاصطناعي الخلفيات من أي صورة.",
+    tile_nano_label:"علامة مائية",tile_nano_title:"نانو بنانا",tile_nano_desc:"يزيل شعار Nano AI السفلي من الصور.",
+    tile_soon_label:"قريباً",tile_soon_title:"أدوات أخرى",tile_soon_desc:"إزالة علامات Midjourney وDALL·E — قيد التطوير.",
+    idx_how_tag:"كيف يعمل",idx_how_h2a:"ثلاث خطوات.",idx_how_h2b:"ثوانٍ.",
+    idx_step1_num:"خطوة 01",idx_step1_title:"ارفع صورتك",idx_step1_desc:"أسقط أو الصق أو تصفح. حتى 20 ميجابايت.",
+    idx_step2_num:"خطوة 02",idx_step2_title:"الذكاء الاصطناعي يعمل",idx_step2_desc:"يكتشف محركنا العلامات المائية أو الخلفيات تلقائياً ويزيلها.",
+    idx_step3_num:"خطوة 03",idx_step3_title:"تنزيل النتيجة",idx_step3_desc:"PNG بدقة كاملة، بدون فقدان جودة.",
+    idx_step4_num:"خطوة 04",idx_step4_title:"مجاني دائماً",idx_step4_desc:"3 محاولات مجانية بدون حساب. سجّل بـ Google للوصول غير المحدود.",
+    idx_feat_tag:"لماذا RemoveAnything",idx_feat_h2a:"مبني من أجل",idx_feat_h2b:"الاستخدام الحقيقي.",
+    feat1_title:"مجاني. دائماً.",feat1_desc:"لا بطاقة ائتمان، لا اشتراك. سجّل بـ Google للوصول غير المحدود.",
+    feat2_title:"أقل من 5 ثوانٍ",feat2_desc:"معالجة بالذكاء الاصطناعي. لا انتظار.",
+    feat3_title:"لا بيانات مخزنة",feat3_desc:"تُعالج الصور في الذاكرة وتُحذف فوراً.",
+    feat4_title:"مخرج بالدقة الكاملة",feat4_desc:"تصدير بالدقة الأصلية كـ PNG بدون ضغط.",
+    feat5_title:"الوصول عبر API",feat5_desc:"أنشئ مفاتيح API من حسابك.",
+    feat6_title:"12 لغة",feat6_desc:"متاح بالعربية والإنجليزية والهندية والإسبانية والفرنسية وغيرها.",
+    faq_tag:"الأسئلة الشائعة",faq_h2a:"أسئلة",faq_h2b:"شائعة",
+    faq1_q:"هل RemoveAnything مجاني حقاً؟",faq1_a:"نعم. 3 معالجات مجانية بدون حساب. سجّل بـ Google للوصول غير المحدود.",
+    faq2_q:"لماذا تسجيل الدخول بـ Google فقط؟",faq2_a:"تسجيل الدخول بـ Google هو الأسرع والأكثر أماناً. لا كلمات مرور، لا تحقق بالبريد.",
+    faq3_q:"هل يتم تخزين صوري على خوادمك؟",faq3_a:"لا. تُعالج جميع الصور في الذاكرة وتُحذف فوراً.",
+    faq4_q:"ما العلامات المائية التي يمكنك إزالتها؟",faq4_a:"علامات Nano Banana السفلية. Midjourney وDALL·E قريباً.",
+    faq5_q:"هل يمكنني الاستخدام عبر API؟",faq5_a:"نعم! سجّل الدخول بـ Google ثم انقر على \"API Keys\". أرسل الطلبات بترويسة <code>X-API-Key</code>.",
+    faq6_q:"ما صيغ الصور المدعومة؟",faq6_a:"PNG وJPG وWebP وBMP وTIFF. المخرج دائماً PNG بدقة كاملة.",
+    bg_hero_tag:"إزالة الخلفية بالذكاء الاصطناعي",bg_hero_h1a:"إزالة",bg_hero_h1b:"الخلفية.",
+    bg_hero_sub:"الذكاء الاصطناعي يزيل أي خلفية في ثوانٍ. مخرج شفاف أو أبيض أو أسود.",
+    bg_pill1:"3 محاولات مجانية",bg_pill2:"حتى 20 ميجابايت",bg_pill3:"PNG بدون ضغط",
+    bg_card_title:"إزالة الخلفية",bg_live:"مباشر",
+    dz_title:"أسقط صورتك هنا",dz_sub_pre:"أو",dz_sub_browse:"تصفح الملفات",dz_sub_post:"· اللصق يعمل أيضاً",
+    output_label:"المخرج:",mode_transparent:"شفاف",mode_white:"خلفية بيضاء",mode_black:"خلفية سوداء",
+    tab_compare:"مقارنة",tab_original:"الأصل",tab_result:"النتيجة",
+    panel_original:"الأصل",panel_result:"النتيجة",
+    ph_text:"في انتظار المعالجة",overlay_removing_bg:"جارٍ إزالة الخلفية…",
+    btn_proc_bg:"إزالة الخلفية",btn_dl:"تنزيل PNG",btn_new:"صورة جديدة",processing:"جارٍ المعالجة…",
+    hist_label:"الأخيرة",hist_empty:"لا شيء بعد — أسقط صورة أعلاه",
+    bg_how_tag:"كيف يعمل",bg_how_h2:"تلقائي.",bg_how_h2b:"دقيق.",
+    bg_step1_num:"خطوة 01",bg_step1_title:"ارفع أي صورة",bg_step1_desc:"PNG وJPG وWebP وBMP أو TIFF حتى 20 ميجابايت.",
+    bg_step2_num:"خطوة 02",bg_step2_title:"الذكاء الاصطناعي يكتشف الموضوع",bg_step2_desc:"نموذج التعلم العميق يحدد الواجهة الأمامية بدقة الحواف.",
+    bg_step3_num:"خطوة 03",bg_step3_title:"اختر المخرج",bg_step3_desc:"PNG شفاف أو خلفية بيضاء أو سوداء.",
+    bg_step4_num:"خطوة 04",bg_step4_title:"تنزيل النتيجة",bg_step4_desc:"PNG بدقة كاملة بدون ضغط.",
+    nb_hero_tag:"علامة Gemini Nano AI المائية",nb_hero_h1a:"نانو بنانا",nb_hero_h1b:"إزالة.",
+    nb_hero_sub:"يزيل علامة Gemini النجمية من صور Nano AI بالرياضيات الدقيقة.",
+    nb_pill1:"عكس مزج ألفا",nb_pill2:"دقة البكسل",nb_pill3:"بدون فقدان جودة",
+    nb_card_title:"إزالة علامة Gemini Nano Banana المائية",
+    nb_dz_title:"أسقط صورة Gemini / Nano AI هنا",nb_dz_sub:"أو تصفح الملفات · ستُزال علامة Gemini النجمية (أسفل اليمين)",
+    nb_panel_orig:"الأصل (مع علامة Gemini المائية)",nb_panel_res:"النتيجة (العلامة المائية مُزالة)",
+    overlay_removing_nb:"جارٍ إزالة علامة Gemini المائية…",
+    btn_proc_nb:"إزالة العلامة المائية",nb_proc_stat:"جارٍ إزالة العلامة المائية…",
+    tab_before:"قبل",tab_after:"بعد",view_before:"قبل",view_after:"بعد",
+    nb_how_tag:"كيف يعمل",nb_how_h2a:"دقيق رياضياً،",nb_how_h2b:"ليس تخمين ذكاء اصطناعي.",
+    nb_step1_num:"خطوة 01",nb_step1_title:"ارفع صورة Gemini / Nano",nb_step1_desc:"أي صورة بعلامة Gemini شبه الشفافة في الزاوية أسفل اليمين.",
+    nb_step2_num:"خطوة 02",nb_step2_title:"تحديد موقع العلامة",nb_step2_desc:"اكتشاف تلقائي: 48×48 بكسل للصور الصغيرة، 96×96 للصور الكبيرة.",
+    nb_step3_num:"خطوة 03",nb_step3_title:"عكس مزج ألفا",nb_step3_desc:"رياضيات دقيقة: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"خطوة 04",nb_step4_title:"نتيجة مثالية على مستوى البكسل",nb_step4_desc:"قيم البكسل الأصلية مستعادة بدقة — لا تخمين، لا فقدان جودة."
+  },
+  es:{
+    nav_home:"Inicio",nav_bg:"Eliminar fondo",nav_nano:"Nano Banana",nav_login:"Iniciar sesión",nav_signup:"Registrarse",nav_api:"Claves API",
+    btn_google:"Continuar con Google",logout_title:"¿Cerrar sesión?",cancel:"Cancelar",logout_btn:"Cerrar sesión",
+    toast_signedin:"¡Sesión iniciada!",toast_admin:"¡Bienvenido, Admin!",toast_out:"Sesión cerrada.",
+    idx_hero_tag:"Con IA · Gratis · Privado",idx_hero_sub:"Fondos, marcas de agua — desaparecen en segundos. Sin pérdida de calidad.",
+    idx_pill1:"3 pruebas gratis",idx_pill2:"Cuenta gratis = ilimitado",idx_pill3:"Sin datos almacenados",
+    tile_bg_label:"Fondo",tile_bg_title:"Eliminar fondo",tile_bg_desc:"IA elimina fondos de cualquier imagen.",
+    tile_nano_label:"Marca de agua",tile_nano_title:"Nano Banana",tile_nano_desc:"Elimina el banner inferior de Nano AI.",
+    tile_soon_label:"Próximamente",tile_soon_title:"Más herramientas",tile_soon_desc:"Eliminación de marcas Midjourney, DALL·E — en proceso.",
+    idx_how_tag:"Cómo funciona",idx_how_h2a:"Tres pasos.",idx_how_h2b:"Segundos.",
+    idx_step1_num:"Paso 01",idx_step1_title:"Sube tu imagen",idx_step1_desc:"Arrastra, pega o navega. Hasta 20 MB.",
+    idx_step2_num:"Paso 02",idx_step2_title:"La IA hace el trabajo",idx_step2_desc:"Nuestro motor detecta y elimina marcas o fondos automáticamente.",
+    idx_step3_num:"Paso 03",idx_step3_title:"Descarga el resultado",idx_step3_desc:"PNG en resolución completa, sin pérdida de calidad.",
+    idx_step4_num:"Paso 04",idx_step4_title:"Siempre gratis",idx_step4_desc:"3 pruebas gratis sin cuenta. Inicia sesión con Google para ilimitado.",
+    idx_feat_tag:"Por qué RemoveAnything",idx_feat_h2a:"Hecho para",idx_feat_h2b:"uso real.",
+    feat1_title:"Gratis. Siempre.",feat1_desc:"Sin tarjeta, sin suscripción. Google para ilimitado — siempre.",
+    feat2_title:"Menos de 5 segundos",feat2_desc:"Procesamiento con IA. Sin colas, sin espera.",
+    feat3_title:"Sin datos almacenados",feat3_desc:"Las imágenes se procesan en memoria y se descartan de inmediato.",
+    feat4_title:"Salida en alta resolución",feat4_desc:"Exporta en resolución original como PNG sin pérdidas.",
+    feat5_title:"Acceso API",feat5_desc:"Genera claves API desde tu cuenta.",
+    feat6_title:"12 idiomas",feat6_desc:"Disponible en español, inglés, hindi, árabe, francés, alemán, chino, japonés y más.",
+    faq_tag:"FAQ",faq_h2a:"Preguntas",faq_h2b:"frecuentes",
+    faq1_q:"¿RemoveAnything es realmente gratis?",faq1_a:"Sí. 3 procesamientos gratuitos sin cuenta. Inicia sesión con Google para ilimitado.",
+    faq2_q:"¿Por qué solo inicio de sesión con Google?",faq2_a:"Es la forma más rápida y segura. Sin contraseñas, sin verificación por email.",
+    faq3_q:"¿Se almacenan mis imágenes?",faq3_a:"No. Se procesan en memoria y se descartan de inmediato.",
+    faq4_q:"¿Qué marcas de agua puedes eliminar?",faq4_a:"Marcas de Nano Banana (Nano AI). Midjourney y DALL·E próximamente.",
+    faq5_q:"¿Puedo usar RemoveAnything vía API?",faq5_a:"¡Sí! Inicia sesión, haz clic en \"API Keys\" y genera tus claves. Envía peticiones con la cabecera <code>X-API-Key</code>.",
+    faq6_q:"¿Qué formatos de imagen se admiten?",faq6_a:"PNG, JPG/JPEG, WebP, BMP y TIFF. La salida siempre es PNG en alta resolución.",
+    bg_hero_tag:"Eliminación de fondo con IA",bg_hero_h1a:"Eliminar",bg_hero_h1b:"Fondo.",
+    bg_hero_sub:"La IA elimina cualquier fondo en segundos. Salida transparente, blanca o negra.",
+    bg_pill1:"3 pruebas gratis",bg_pill2:"Hasta 20 MB",bg_pill3:"PNG sin pérdidas",
+    bg_card_title:"Eliminar fondo",bg_live:"en vivo",
+    dz_title:"Arrastra tu imagen aquí",dz_sub_pre:"o",dz_sub_browse:"examinar archivos",dz_sub_post:"· pegar también funciona",
+    output_label:"Salida:",mode_transparent:"Transparente",mode_white:"Fondo blanco",mode_black:"Fondo negro",
+    tab_compare:"Comparar",tab_original:"Original",tab_result:"Resultado",
+    panel_original:"Original",panel_result:"Resultado",
+    ph_text:"esperando procesamiento",overlay_removing_bg:"eliminando fondo…",
+    btn_proc_bg:"Eliminar fondo",btn_dl:"Descargar PNG",btn_new:"Nueva imagen",processing:"procesando…",
+    hist_label:"Recientes",hist_empty:"Nada aún — arrastra una imagen arriba",
+    bg_how_tag:"Cómo funciona",bg_how_h2:"Automático.",bg_how_h2b:"Preciso.",
+    bg_step1_num:"Paso 01",bg_step1_title:"Sube cualquier imagen",bg_step1_desc:"PNG, JPG, WebP, BMP o TIFF hasta 20 MB.",
+    bg_step2_num:"Paso 02",bg_step2_title:"La IA detecta el sujeto",bg_step2_desc:"Modelo de aprendizaje profundo identifica el primer plano con precisión.",
+    bg_step3_num:"Paso 03",bg_step3_title:"Elige la salida",bg_step3_desc:"PNG transparente, fondo blanco sólido o negro.",
+    bg_step4_num:"Paso 04",bg_step4_title:"Descarga el resultado",bg_step4_desc:"PNG sin pérdidas en resolución completa.",
+    nb_hero_tag:"Marca de agua Gemini Nano AI",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Remover.",
+    nb_hero_sub:"Elimina la marca de agua estrella de Gemini por inversión alfa exacta.",
+    nb_pill1:"Inversión alfa",nb_pill2:"Perfecto por píxel",nb_pill3:"Sin pérdida de calidad",
+    nb_card_title:"Eliminador de marca Gemini Nano Banana",
+    nb_dz_title:"Arrastra imagen Gemini / Nano AI aquí",nb_dz_sub:"o examinar archivos · la marca estrella será eliminada",
+    nb_panel_orig:"Original (con marca Gemini)",nb_panel_res:"Resultado (marca eliminada)",
+    overlay_removing_nb:"eliminando marca de agua Gemini…",
+    btn_proc_nb:"Eliminar marca",nb_proc_stat:"eliminando marca…",
+    tab_before:"Antes",tab_after:"Después",view_before:"Antes",view_after:"Después",
+    nb_how_tag:"Cómo funciona",nb_how_h2a:"Matemáticamente exacto,",nb_how_h2b:"no adivinanza de IA.",
+    nb_step1_num:"Paso 01",nb_step1_title:"Sube imagen Gemini / Nano",nb_step1_desc:"Cualquier imagen con la marca semitransparente de Gemini en la esquina inferior derecha.",
+    nb_step2_num:"Paso 02",nb_step2_title:"Marca localizada",nb_step2_desc:"Detección automática: 48×48px para imágenes pequeñas, 96×96px para mayores de 1024px.",
+    nb_step3_num:"Paso 03",nb_step3_title:"Inversión alfa",nb_step3_desc:"Matemática exacta: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Paso 04",nb_step4_title:"Resultado perfecto por píxel",nb_step4_desc:"Valores de píxel recuperados con precisión — sin inpainting, sin suposiciones."
+  },
+  fr:{
+    nav_home:"Accueil",nav_bg:"Supprimer fond",nav_nano:"Nano Banana",nav_login:"Connexion",nav_signup:"S'inscrire",nav_api:"Clés API",
+    btn_google:"Continuer avec Google",logout_title:"Se déconnecter ?",cancel:"Annuler",logout_btn:"Se déconnecter",
+    toast_signedin:"Connecté !",toast_admin:"Bienvenue, Admin !",toast_out:"Déconnecté.",
+    idx_hero_tag:"IA · Gratuit · Privé",idx_hero_sub:"Arrière-plans, filigranes IA — disparus en secondes. Aucune perte de qualité.",
+    idx_pill1:"3 essais gratuits",idx_pill2:"Compte gratuit = illimité",idx_pill3:"Aucune donnée stockée",
+    tile_bg_label:"Arrière-plan",tile_bg_title:"Supprimer fond",tile_bg_desc:"L'IA supprime les arrière-plans de n'importe quelle image.",
+    tile_nano_label:"Filigrane",tile_nano_title:"Nano Banana",tile_nano_desc:"Supprime la bannière Nano AI en bas des images.",
+    tile_soon_label:"Bientôt",tile_soon_title:"Plus d'outils",tile_soon_desc:"Suppression de filigranes Midjourney, DALL·E — en cours.",
+    idx_how_tag:"Comment ça marche",idx_how_h2a:"Trois étapes.",idx_how_h2b:"Secondes.",
+    idx_step1_num:"Étape 01",idx_step1_title:"Téléchargez votre image",idx_step1_desc:"Glissez, collez ou parcourez. Jusqu'à 20 Mo.",
+    idx_step2_num:"Étape 02",idx_step2_title:"L'IA fait le travail",idx_step2_desc:"Notre moteur détecte et supprime automatiquement les filigranes ou arrière-plans.",
+    idx_step3_num:"Étape 03",idx_step3_title:"Téléchargez le résultat",idx_step3_desc:"PNG pleine résolution, sans perte de qualité.",
+    idx_step4_num:"Étape 04",idx_step4_title:"Toujours gratuit",idx_step4_desc:"3 essais gratuits sans compte. Connectez-vous avec Google pour illimité.",
+    idx_feat_tag:"Pourquoi RemoveAnything",idx_feat_h2a:"Fait pour",idx_feat_h2b:"un usage réel.",
+    feat1_title:"Gratuit. Toujours.",feat1_desc:"Pas de carte, pas d'abonnement. Google pour illimité — pour toujours.",
+    feat2_title:"Moins de 5 secondes",feat2_desc:"Traitement par IA. Pas de files, pas d'attente.",
+    feat3_title:"Aucune donnée stockée",feat3_desc:"Les images sont traitées en mémoire et supprimées immédiatement.",
+    feat4_title:"Sortie pleine résolution",feat4_desc:"Exportez en résolution originale en PNG sans perte.",
+    feat5_title:"Accès API",feat5_desc:"Générez des clés API depuis votre compte.",
+    feat6_title:"12 langues",feat6_desc:"Disponible en français, anglais, hindi, arabe, espagnol, allemand, chinois, japonais et plus.",
+    faq_tag:"FAQ",faq_h2a:"Questions",faq_h2b:"fréquentes",
+    faq1_q:"RemoveAnything est-il vraiment gratuit ?",faq1_a:"Oui. 3 traitements gratuits sans compte. Connectez-vous avec Google pour illimité.",
+    faq2_q:"Pourquoi uniquement Google ?",faq2_a:"C'est le moyen le plus rapide et sécurisé. Pas de mot de passe, pas de vérification.",
+    faq3_q:"Mes images sont-elles stockées ?",faq3_a:"Non. Traitées en mémoire et supprimées immédiatement.",
+    faq4_q:"Quels filigranes pouvez-vous supprimer ?",faq4_a:"Filigranes Nano Banana (Nano AI). Midjourney et DALL·E bientôt.",
+    faq5_q:"Puis-je utiliser RemoveAnything via API ?",faq5_a:"Oui ! Connectez-vous, cliquez sur \"API Keys\" et générez vos clés. Envoyez les requêtes avec l'en-tête <code>X-API-Key</code>.",
+    faq6_q:"Quels formats d'image sont pris en charge ?",faq6_a:"PNG, JPG/JPEG, WebP, BMP et TIFF. La sortie est toujours PNG pleine résolution.",
+    bg_hero_tag:"Suppression de fond par IA",bg_hero_h1a:"Supprimer",bg_hero_h1b:"Fond.",
+    bg_hero_sub:"L'IA supprime n'importe quel arrière-plan en secondes. Sortie transparente, blanche ou noire.",
+    bg_pill1:"3 essais gratuits",bg_pill2:"Jusqu'à 20 Mo",bg_pill3:"PNG sans perte",
+    bg_card_title:"Supprimer fond",bg_live:"en direct",
+    dz_title:"Déposez votre image ici",dz_sub_pre:"ou",dz_sub_browse:"parcourir les fichiers",dz_sub_post:"· coller fonctionne aussi",
+    output_label:"Sortie :",mode_transparent:"Transparent",mode_white:"Fond blanc",mode_black:"Fond noir",
+    tab_compare:"Comparer",tab_original:"Original",tab_result:"Résultat",
+    panel_original:"Original",panel_result:"Résultat",
+    ph_text:"en attente de traitement",overlay_removing_bg:"suppression du fond…",
+    btn_proc_bg:"Supprimer le fond",btn_dl:"Télécharger PNG",btn_new:"Nouvelle image",processing:"traitement…",
+    hist_label:"Récents",hist_empty:"Rien encore — déposez une image ci-dessus",
+    bg_how_tag:"Comment ça marche",bg_how_h2:"Automatique.",bg_how_h2b:"Précis.",
+    bg_step1_num:"Étape 01",bg_step1_title:"Téléchargez n'importe quelle image",bg_step1_desc:"PNG, JPG, WebP, BMP ou TIFF jusqu'à 20 Mo.",
+    bg_step2_num:"Étape 02",bg_step2_title:"L'IA détecte le sujet",bg_step2_desc:"Modèle d'apprentissage profond identifie le premier plan avec précision.",
+    bg_step3_num:"Étape 03",bg_step3_title:"Choisissez la sortie",bg_step3_desc:"PNG transparent, fond blanc ou noir.",
+    bg_step4_num:"Étape 04",bg_step4_title:"Téléchargez le résultat",bg_step4_desc:"PNG pleine résolution sans perte.",
+    nb_hero_tag:"Filigrane Gemini Nano AI",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Suppression.",
+    nb_hero_sub:"Supprime le filigrane étoile Gemini par inversion alpha mathématiquement exacte.",
+    nb_pill1:"Inversion alpha",nb_pill2:"Parfait au pixel",nb_pill3:"Sans perte de qualité",
+    nb_card_title:"Suppression du filigrane Gemini Nano Banana",
+    nb_dz_title:"Déposez une image Gemini / Nano AI ici",nb_dz_sub:"ou parcourir · le filigrane étoile sera supprimé",
+    nb_panel_orig:"Original (avec filigrane Gemini)",nb_panel_res:"Résultat (filigrane supprimé)",
+    overlay_removing_nb:"suppression du filigrane Gemini…",
+    btn_proc_nb:"Supprimer filigrane",nb_proc_stat:"suppression du filigrane…",
+    tab_before:"Avant",tab_after:"Après",view_before:"Avant",view_after:"Après",
+    nb_how_tag:"Comment ça marche",nb_how_h2a:"Mathématiquement exact,",nb_how_h2b:"pas de devinette IA.",
+    nb_step1_num:"Étape 01",nb_step1_title:"Téléchargez l'image Gemini / Nano",nb_step1_desc:"Toute image avec le filigrane semi-transparent Gemini en bas à droite.",
+    nb_step2_num:"Étape 02",nb_step2_title:"Filigrane localisé",nb_step2_desc:"Détection automatique : 48×48px pour les petites images, 96×96px au-delà de 1024px.",
+    nb_step3_num:"Étape 03",nb_step3_title:"Inversion alpha",nb_step3_desc:"Mathématiques exactes : original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Étape 04",nb_step4_title:"Résultat parfait au pixel",nb_step4_desc:"Valeurs de pixels récupérées avec précision — sans inpainting, sans estimation."
+  },
+  de:{
+    nav_home:"Startseite",nav_bg:"Hintergrund",nav_nano:"Nano Banana",nav_login:"Anmelden",nav_signup:"Registrieren",nav_api:"API-Schlüssel",
+    btn_google:"Mit Google fortfahren",logout_title:"Abmelden?",cancel:"Abbrechen",logout_btn:"Abmelden",
+    toast_signedin:"Angemeldet!",toast_admin:"Willkommen, Admin!",toast_out:"Abgemeldet.",
+    idx_hero_tag:"KI · Kostenlos · Privat",idx_hero_sub:"Hintergründe, KI-Wasserzeichen — weg in Sekunden. Kein Qualitätsverlust.",
+    idx_pill1:"3 kostenlose Versuche",idx_pill2:"Kostenloses Konto = unbegrenzt",idx_pill3:"Keine Daten gespeichert",
+    tile_bg_label:"Hintergrund",tile_bg_title:"Hintergrund entfernen",tile_bg_desc:"KI entfernt Hintergründe von jedem Bild.",
+    tile_nano_label:"Wasserzeichen",tile_nano_title:"Nano Banana",tile_nano_desc:"Entfernt das Nano-AI-Banner.",
+    tile_soon_label:"Demnächst",tile_soon_title:"Mehr Tools",tile_soon_desc:"Midjourney, DALL·E Wasserzeichen — in Arbeit.",
+    idx_how_tag:"Wie es funktioniert",idx_how_h2a:"Drei Schritte.",idx_how_h2b:"Sekunden.",
+    idx_step1_num:"Schritt 01",idx_step1_title:"Bild hochladen",idx_step1_desc:"Ablegen, einfügen oder durchsuchen. Bis zu 20 MB.",
+    idx_step2_num:"Schritt 02",idx_step2_title:"KI erledigt die Arbeit",idx_step2_desc:"Unser Motor erkennt und entfernt Wasserzeichen oder Hintergründe automatisch.",
+    idx_step3_num:"Schritt 03",idx_step3_title:"Ergebnis herunterladen",idx_step3_desc:"PNG in voller Auflösung, kein Qualitätsverlust.",
+    idx_step4_num:"Schritt 04",idx_step4_title:"Immer kostenlos",idx_step4_desc:"3 kostenlose Versuche ohne Konto. Mit Google anmelden für unbegrenzt.",
+    idx_feat_tag:"Warum RemoveAnything",idx_feat_h2a:"Gebaut für",idx_feat_h2b:"echten Einsatz.",
+    feat1_title:"Kostenlos. Immer.",feat1_desc:"Keine Karte, kein Abo. Google für unbegrenzt — für immer.",
+    feat2_title:"Unter 5 Sekunden",feat2_desc:"KI-Verarbeitung. Keine Warteschlangen.",
+    feat3_title:"Keine Daten gespeichert",feat3_desc:"Bilder werden im Speicher verarbeitet und sofort gelöscht.",
+    feat4_title:"Volle Auflösung",feat4_desc:"Export in Originalauflösung als verlustfreies PNG.",
+    feat5_title:"API-Zugang",feat5_desc:"Generieren Sie API-Schlüssel von Ihrem Konto.",
+    feat6_title:"12 Sprachen",feat6_desc:"Verfügbar auf Deutsch, Englisch, Hindi, Arabisch, Spanisch, Französisch, Chinesisch, Japanisch und mehr.",
+    faq_tag:"FAQ",faq_h2a:"Häufige",faq_h2b:"Fragen",
+    faq1_q:"Ist RemoveAnything wirklich kostenlos?",faq1_a:"Ja. 3 kostenlose Verarbeitungen ohne Konto. Mit Google anmelden für unbegrenzt.",
+    faq2_q:"Warum nur Google-Anmeldung?",faq2_a:"Google-Anmeldung ist am schnellsten und sichersten. Kein Passwort, keine E-Mail-Verifizierung.",
+    faq3_q:"Werden meine Bilder gespeichert?",faq3_a:"Nein. Im Speicher verarbeitet und sofort gelöscht.",
+    faq4_q:"Welche Wasserzeichen können Sie entfernen?",faq4_a:"Nano Banana (Nano AI) Banner-Wasserzeichen. Midjourney und DALL·E demnächst.",
+    faq5_q:"Kann ich RemoveAnything über API nutzen?",faq5_a:"Ja! Melden Sie sich an, klicken Sie auf \"API Keys\" und generieren Sie Ihre Schlüssel. Senden Sie Anfragen mit dem Header <code>X-API-Key</code>.",
+    faq6_q:"Welche Bildformate werden unterstützt?",faq6_a:"PNG, JPG/JPEG, WebP, BMP und TIFF. Ausgabe ist immer PNG in voller Auflösung.",
+    bg_hero_tag:"KI-Hintergrundentfernung",bg_hero_h1a:"Hintergrund",bg_hero_h1b:"Entfernen.",
+    bg_hero_sub:"KI entfernt jeden Hintergrund in Sekunden. Transparente, weiße oder schwarze Ausgabe.",
+    bg_pill1:"3 kostenlose Versuche",bg_pill2:"Bis zu 20 MB",bg_pill3:"Verlustfreies PNG",
+    bg_card_title:"Hintergrund entfernen",bg_live:"live",
+    dz_title:"Bild hier ablegen",dz_sub_pre:"oder",dz_sub_browse:"Dateien durchsuchen",dz_sub_post:"· Einfügen funktioniert auch",
+    output_label:"Ausgabe:",mode_transparent:"Transparent",mode_white:"Weißer HG",mode_black:"Schwarzer HG",
+    tab_compare:"Vergleichen",tab_original:"Original",tab_result:"Ergebnis",
+    panel_original:"Original",panel_result:"Ergebnis",
+    ph_text:"warte auf Verarbeitung",overlay_removing_bg:"Hintergrund wird entfernt…",
+    btn_proc_bg:"Hintergrund entfernen",btn_dl:"PNG herunterladen",btn_new:"Neues Bild",processing:"Verarbeitung…",
+    hist_label:"Zuletzt",hist_empty:"Noch nichts — Bild oben ablegen",
+    bg_how_tag:"Wie es funktioniert",bg_how_h2:"Automatisch.",bg_how_h2b:"Präzise.",
+    bg_step1_num:"Schritt 01",bg_step1_title:"Beliebiges Bild hochladen",bg_step1_desc:"PNG, JPG, WebP, BMP oder TIFF bis zu 20 MB.",
+    bg_step2_num:"Schritt 02",bg_step2_title:"KI erkennt Motiv",bg_step2_desc:"Deep-Learning-Modell identifiziert Vordergrund mit Kantenpräzision.",
+    bg_step3_num:"Schritt 03",bg_step3_title:"Ausgabe wählen",bg_step3_desc:"Transparentes PNG, weißer oder schwarzer Hintergrund.",
+    bg_step4_num:"Schritt 04",bg_step4_title:"Ergebnis herunterladen",bg_step4_desc:"Verlustfreies PNG in voller Auflösung.",
+    nb_hero_tag:"Gemini Nano AI Wasserzeichen",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Entfernen.",
+    nb_hero_sub:"Entfernt das Gemini-Stern-Wasserzeichen durch mathematisch exakte Alpha-Umkehrung.",
+    nb_pill1:"Alpha-Umkehrung",nb_pill2:"Pixelgenau",nb_pill3:"Kein Qualitätsverlust",
+    nb_card_title:"Gemini Nano Banana Wasserzeichen entfernen",
+    nb_dz_title:"Gemini / Nano AI Bild hier ablegen",nb_dz_sub:"oder Dateien durchsuchen · das Gemini-Stern-Wasserzeichen wird entfernt",
+    nb_panel_orig:"Original (mit Gemini-Wasserzeichen)",nb_panel_res:"Ergebnis (Wasserzeichen entfernt)",
+    overlay_removing_nb:"Gemini-Wasserzeichen wird entfernt…",
+    btn_proc_nb:"Wasserzeichen entfernen",nb_proc_stat:"Wasserzeichen wird entfernt…",
+    tab_before:"Vorher",tab_after:"Nachher",view_before:"Vorher",view_after:"Nachher",
+    nb_how_tag:"Wie es funktioniert",nb_how_h2a:"Mathematisch exakt,",nb_how_h2b:"kein KI-Raten.",
+    nb_step1_num:"Schritt 01",nb_step1_title:"Gemini / Nano Bild hochladen",nb_step1_desc:"Beliebiges Bild mit dem halbtransparenten Gemini-Stern unten rechts.",
+    nb_step2_num:"Schritt 02",nb_step2_title:"Wasserzeichen lokalisiert",nb_step2_desc:"Automatisch erkannt: 48×48px für kleine Bilder, 96×96px für Bilder über 1024px.",
+    nb_step3_num:"Schritt 03",nb_step3_title:"Alpha-Umkehrung",nb_step3_desc:"Exakte Mathematik: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Schritt 04",nb_step4_title:"Pixelgenaues Ergebnis",nb_step4_desc:"Originalpixelwerte präzise wiederhergestellt — kein Inpainting, kein Raten."
+  },
+  zh:{
+    nav_home:"首页",nav_bg:"去除背景",nav_nano:"去除水印",nav_login:"登录",nav_signup:"注册",nav_api:"API密钥",
+    btn_google:"使用Google继续",logout_title:"退出登录？",cancel:"取消",logout_btn:"退出",
+    toast_signedin:"已登录！",toast_admin:"欢迎，管理员！",toast_out:"已退出。",
+    idx_hero_tag:"AI驱动 · 免费 · 私密",idx_hero_sub:"背景、AI水印——秒速消除。无质量损失，零数据存储。",
+    idx_pill1:"3次免费试用",idx_pill2:"免费账户=无限次",idx_pill3:"零数据存储",
+    tile_bg_label:"背景",tile_bg_title:"去除背景",tile_bg_desc:"AI从任何图像中去除背景。透明、白色或黑色输出。",
+    tile_nano_label:"水印",tile_nano_title:"Nano Banana",tile_nano_desc:"使用智能修复去除Nano AI底部横幅。",
+    tile_soon_label:"即将推出",tile_soon_title:"更多工具",tile_soon_desc:"Midjourney、DALL·E水印去除——开发中。",
+    idx_how_tag:"使用方法",idx_how_h2a:"三步完成。",idx_how_h2b:"几秒钟。",
+    idx_step1_num:"步骤 01",idx_step1_title:"上传图像",idx_step1_desc:"拖放、粘贴或浏览。最大20 MB。",
+    idx_step2_num:"步骤 02",idx_step2_title:"AI自动处理",idx_step2_desc:"我们的引擎自动检测并去除水印或背景。",
+    idx_step3_num:"步骤 03",idx_step3_title:"下载结果",idx_step3_desc:"全分辨率PNG，零质量损失。",
+    idx_step4_num:"步骤 04",idx_step4_title:"永久免费",idx_step4_desc:"无需账户即可免费使用3次。用Google登录获得无限次数。",
+    idx_feat_tag:"为什么选择RemoveAnything",idx_feat_h2a:"专为",idx_feat_h2b:"实际使用而生。",
+    feat1_title:"免费。永久。",feat1_desc:"无需信用卡，无需订阅。Google登录永久免费无限次。",
+    feat2_title:"5秒以内",feat2_desc:"AI驱动处理。无排队，无等待。",
+    feat3_title:"零数据存储",feat3_desc:"图像在内存中处理后立即丢弃。",
+    feat4_title:"全分辨率输出",feat4_desc:"以原始分辨率导出为无损PNG。",
+    feat5_title:"API访问",feat5_desc:"从账户生成API密钥。",
+    feat6_title:"12种语言",feat6_desc:"支持中文、英语、印地语、阿拉伯语、西班牙语、法语、德语、日语等。",
+    faq_tag:"常见问题",faq_h2a:"常见",faq_h2b:"问题",
+    faq1_q:"RemoveAnything真的免费吗？",faq1_a:"是的。无账户可免费处理3次。用Google登录获得无限次数。",
+    faq2_q:"为什么只支持Google登录？",faq2_a:"Google登录是最快、最安全的方式。无需密码，无需邮箱验证。",
+    faq3_q:"我的图像会存储在服务器上吗？",faq3_a:"不会。所有图像在内存中处理后立即丢弃。",
+    faq4_q:"你们可以去除哪些水印？",faq4_a:"Nano Banana (Nano AI) 底部横幅水印。Midjourney和DALL·E即将支持。",
+    faq5_q:"可以通过API使用RemoveAnything吗？",faq5_a:"可以！用Google登录，点击\"API Keys\"生成密钥。请求时使用<code>X-API-Key</code>请求头。",
+    faq6_q:"支持哪些图像格式？",faq6_a:"PNG、JPG/JPEG、WebP、BMP和TIFF。输出始终为全分辨率PNG。",
+    bg_hero_tag:"AI背景去除",bg_hero_h1a:"背景",bg_hero_h1b:"去除。",
+    bg_hero_sub:"AI秒速去除任何背景。全分辨率透明、白色或黑色输出。",
+    bg_pill1:"3次免费试用",bg_pill2:"最大20 MB",bg_pill3:"无损PNG",
+    bg_card_title:"背景去除器",bg_live:"实时",
+    dz_title:"在此拖放图像",dz_sub_pre:"或",dz_sub_browse:"浏览文件",dz_sub_post:"· 粘贴也可以",
+    output_label:"输出：",mode_transparent:"透明",mode_white:"白色背景",mode_black:"黑色背景",
+    tab_compare:"对比",tab_original:"原图",tab_result:"结果",
+    panel_original:"原图",panel_result:"结果",
+    ph_text:"等待处理",overlay_removing_bg:"正在去除背景…",
+    btn_proc_bg:"去除背景",btn_dl:"下载PNG",btn_new:"新图像",processing:"处理中…",
+    hist_label:"最近",hist_empty:"尚无记录——在上方拖放图像",
+    bg_how_tag:"使用方法",bg_how_h2:"自动。",bg_how_h2b:"精准。",
+    bg_step1_num:"步骤 01",bg_step1_title:"上传任意图像",bg_step1_desc:"最大20 MB的PNG、JPG、WebP、BMP或TIFF。",
+    bg_step2_num:"步骤 02",bg_step2_title:"AI检测主体",bg_step2_desc:"深度学习模型以边缘精度识别前景主体。",
+    bg_step3_num:"步骤 03",bg_step3_title:"选择输出",bg_step3_desc:"透明PNG、纯白或纯黑背景。",
+    bg_step4_num:"步骤 04",bg_step4_title:"下载结果",bg_step4_desc:"全分辨率无损PNG。",
+    nb_hero_tag:"Gemini Nano AI水印",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"去除。",
+    nb_hero_sub:"使用数学精确的反向Alpha混合去除Nano AI图像的Gemini星形水印。",
+    nb_pill1:"反向Alpha混合",nb_pill2:"像素级精准",nb_pill3:"零质量损失",
+    nb_card_title:"Gemini Nano Banana水印去除器",
+    nb_dz_title:"在此拖放Gemini / Nano AI图像",nb_dz_sub:"或浏览文件 · Gemini星形水印将被去除",
+    nb_panel_orig:"原图（含Gemini水印）",nb_panel_res:"结果（水印已去除）",
+    overlay_removing_nb:"正在去除Gemini水印…",
+    btn_proc_nb:"去除水印",nb_proc_stat:"正在去除水印…",
+    tab_before:"之前",tab_after:"之后",view_before:"之前",view_after:"之后",
+    nb_how_tag:"使用方法",nb_how_h2a:"数学精确，",nb_how_h2b:"非AI猜测。",
+    nb_step1_num:"步骤 01",nb_step1_title:"上传Gemini / Nano图像",nb_step1_desc:"任何右下角带有Gemini半透明星形水印的图像。",
+    nb_step2_num:"步骤 02",nb_step2_title:"水印已定位",nb_step2_desc:"自动检测：小图像48×48像素，1024px以上图像96×96像素。",
+    nb_step3_num:"步骤 03",nb_step3_title:"反向Alpha混合",nb_step3_desc:"精确数学：original = (blended − α×255) / (1−α)。",
+    nb_step4_num:"步骤 04",nb_step4_title:"像素级完美结果",nb_step4_desc:"精确恢复原始像素值——无修复，无猜测，零质量损失。"
+  },
+  ja:{
+    nav_home:"ホーム",nav_bg:"背景除去",nav_nano:"透かし除去",nav_login:"ログイン",nav_signup:"登録",nav_api:"APIキー",
+    btn_google:"Googleで続ける",logout_title:"ログアウト？",cancel:"キャンセル",logout_btn:"ログアウト",
+    toast_signedin:"ログイン完了！",toast_admin:"ようこそ！",toast_out:"ログアウトしました。",
+    idx_hero_tag:"AI搭載 · 無料 · プライベート",idx_hero_sub:"背景、AI透かし — 数秒で消去。品質損失なし、データ保存なし。",
+    idx_pill1:"無料3回",idx_pill2:"無料アカウント=無制限",idx_pill3:"データ保存なし",
+    tile_bg_label:"背景",tile_bg_title:"背景除去",tile_bg_desc:"AIが任意の画像から背景を削除。透明・白・黒の出力。",
+    tile_nano_label:"透かし",tile_nano_title:"Nano Banana",tile_nano_desc:"スマートインペインティングでNano AIバナーを削除。",
+    tile_soon_label:"近日公開",tile_soon_title:"さらなるツール",tile_soon_desc:"Midjourney、DALL·E透かし削除 — 開発中。",
+    idx_how_tag:"使い方",idx_how_h2a:"3ステップ。",idx_how_h2b:"数秒。",
+    idx_step1_num:"ステップ 01",idx_step1_title:"画像をアップロード",idx_step1_desc:"ドロップ、貼り付け、またはブラウズ。最大20 MB。",
+    idx_step2_num:"ステップ 02",idx_step2_title:"AIが処理",idx_step2_desc:"エンジンが透かしや背景を自動検出・削除。",
+    idx_step3_num:"ステップ 03",idx_step3_title:"結果をダウンロード",idx_step3_desc:"フル解像度PNG、品質損失ゼロ。",
+    idx_step4_num:"ステップ 04",idx_step4_title:"常に無料",idx_step4_desc:"アカウントなしで3回無料。Googleでサインインして無制限。",
+    idx_feat_tag:"なぜRemoveAnythingか",idx_feat_h2a:"実用的な",idx_feat_h2b:"使用のために。",
+    feat1_title:"無料。ずっと。",feat1_desc:"クレジットカード不要、サブスクなし。Googleで無制限 — 永久に。",
+    feat2_title:"5秒以内",feat2_desc:"AI処理。キュー待ちなし。",
+    feat3_title:"データ保存なし",feat3_desc:"画像はメモリで処理後即座に廃棄。",
+    feat4_title:"フル解像度出力",feat4_desc:"元の解像度でロスレスPNGとして書き出し。",
+    feat5_title:"APIアクセス",feat5_desc:"アカウントからAPIキーを生成。",
+    feat6_title:"12言語",feat6_desc:"日本語、英語、ヒンディー語、アラビア語、スペイン語、フランス語、ドイツ語、中国語など対応。",
+    faq_tag:"よくある質問",faq_h2a:"よくある",faq_h2b:"質問",
+    faq1_q:"RemoveAnythingは本当に無料ですか？",faq1_a:"はい。アカウントなしで3回無料。Googleでサインインして無制限。",
+    faq2_q:"なぜGoogleログインのみ？",faq2_a:"最速かつ最も安全な方法です。パスワード不要、メール確認不要。",
+    faq3_q:"画像はサーバーに保存されますか？",faq3_a:"いいえ。メモリで処理後即座に廃棄。",
+    faq4_q:"どの透かしを削除できますか？",faq4_a:"Nano Banana (Nano AI) バナー透かし。MidjourneyとDALL·Eは近日対応。",
+    faq5_q:"APIでRemoveAnythingを使えますか？",faq5_a:"はい！Googleでサインインし、「API Keys」をクリックしてキーを生成。<code>X-API-Key</code>ヘッダーで送信。",
+    faq6_q:"対応画像フォーマットは？",faq6_a:"PNG、JPG/JPEG、WebP、BMP、TIFF。出力は常にフル解像度PNG。",
+    bg_hero_tag:"AI背景除去",bg_hero_h1a:"背景",bg_hero_h1b:"リムーバー。",
+    bg_hero_sub:"AIが数秒でどんな背景も削除。フル解像度で透明・白・黒の出力。",
+    bg_pill1:"無料3回",bg_pill2:"最大20 MB",bg_pill3:"ロスレスPNG",
+    bg_card_title:"背景リムーバー",bg_live:"ライブ",
+    dz_title:"ここに画像をドロップ",dz_sub_pre:"または",dz_sub_browse:"ファイルを選択",dz_sub_post:"· 貼り付けも可",
+    output_label:"出力：",mode_transparent:"透明",mode_white:"白背景",mode_black:"黒背景",
+    tab_compare:"比較",tab_original:"元画像",tab_result:"結果",
+    panel_original:"元画像",panel_result:"結果",
+    ph_text:"処理待ち",overlay_removing_bg:"背景を削除中…",
+    btn_proc_bg:"背景を削除",btn_dl:"PNGをダウンロード",btn_new:"新しい画像",processing:"処理中…",
+    hist_label:"最近",hist_empty:"まだなし — 上に画像をドロップ",
+    bg_how_tag:"使い方",bg_how_h2:"自動。",bg_how_h2b:"精密。",
+    bg_step1_num:"ステップ 01",bg_step1_title:"任意の画像をアップロード",bg_step1_desc:"最大20 MBのPNG、JPG、WebP、BMP、TIFF。",
+    bg_step2_num:"ステップ 02",bg_step2_title:"AIが被写体を検出",bg_step2_desc:"深層学習モデルがエッジ精度で前景を識別。",
+    bg_step3_num:"ステップ 03",bg_step3_title:"出力を選択",bg_step3_desc:"透明PNG、白または黒の単色背景。",
+    bg_step4_num:"ステップ 04",bg_step4_title:"結果をダウンロード",bg_step4_desc:"フル解像度ロスレスPNG。",
+    nb_hero_tag:"Gemini Nano AI透かし",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"リムーバー。",
+    nb_hero_sub:"数学的に正確な逆アルファブレンドでNano AI画像のGemini星透かしを削除。",
+    nb_pill1:"逆アルファブレンド",nb_pill2:"ピクセル完全",nb_pill3:"品質損失ゼロ",
+    nb_card_title:"Gemini Nano Banana透かしリムーバー",
+    nb_dz_title:"ここにGemini / Nano AI画像をドロップ",nb_dz_sub:"またはファイルを選択 · Gemini星透かしを削除",
+    nb_panel_orig:"元画像（Gemini透かしあり）",nb_panel_res:"結果（透かし削除済み）",
+    overlay_removing_nb:"Gemini透かしを削除中…",
+    btn_proc_nb:"透かしを削除",nb_proc_stat:"透かしを削除中…",
+    tab_before:"ビフォー",tab_after:"アフター",view_before:"ビフォー",view_after:"アフター",
+    nb_how_tag:"使い方",nb_how_h2a:"数学的に正確、",nb_how_h2b:"AIの推測ではない。",
+    nb_step1_num:"ステップ 01",nb_step1_title:"Gemini / Nano画像をアップロード",nb_step1_desc:"右下に半透明のGemini星透かしがある画像。",
+    nb_step2_num:"ステップ 02",nb_step2_title:"透かしを特定",nb_step2_desc:"自動検出：小さい画像は48×48px、1024px超は96×96px。",
+    nb_step3_num:"ステップ 03",nb_step3_title:"逆アルファブレンド",nb_step3_desc:"正確な計算式：original = (blended − α×255) / (1−α)。",
+    nb_step4_num:"ステップ 04",nb_step4_title:"ピクセル完全な結果",nb_step4_desc:"元のピクセル値を正確に回復 — インペインティングなし、推測なし。"
+  },
+  pt:{
+    nav_home:"Início",nav_bg:"Remover fundo",nav_nano:"Nano Banana",nav_login:"Entrar",nav_signup:"Cadastrar",nav_api:"Chaves API",
+    btn_google:"Continuar com Google",logout_title:"Sair?",cancel:"Cancelar",logout_btn:"Sair",
+    toast_signedin:"Conectado!",toast_admin:"Bem-vindo, Admin!",toast_out:"Saiu.",
+    idx_hero_tag:"IA · Grátis · Privado",idx_hero_sub:"Fundos, marcas d'água IA — desaparecem em segundos. Sem perda de qualidade.",
+    idx_pill1:"3 tentativas grátis",idx_pill2:"Conta grátis = ilimitado",idx_pill3:"Sem dados armazenados",
+    tile_bg_label:"Fundo",tile_bg_title:"Remover fundo",tile_bg_desc:"IA remove fundos de qualquer imagem.",
+    tile_nano_label:"Marca d'água",tile_nano_title:"Nano Banana",tile_nano_desc:"Remove o banner Nano AI usando inpainting inteligente.",
+    tile_soon_label:"Em breve",tile_soon_title:"Mais ferramentas",tile_soon_desc:"Remoção de marcas Midjourney, DALL·E — em desenvolvimento.",
+    idx_how_tag:"Como funciona",idx_how_h2a:"Três passos.",idx_how_h2b:"Segundos.",
+    idx_step1_num:"Passo 01",idx_step1_title:"Envie sua imagem",idx_step1_desc:"Arraste, cole ou navegue. Até 20 MB.",
+    idx_step2_num:"Passo 02",idx_step2_title:"A IA faz o trabalho",idx_step2_desc:"Nosso motor detecta e remove marcas ou fundos automaticamente.",
+    idx_step3_num:"Passo 03",idx_step3_title:"Baixe o resultado",idx_step3_desc:"PNG em resolução completa, sem perda de qualidade.",
+    idx_step4_num:"Passo 04",idx_step4_title:"Sempre grátis",idx_step4_desc:"3 tentativas grátis sem conta. Entre com Google para ilimitado.",
+    idx_feat_tag:"Por que RemoveAnything",idx_feat_h2a:"Feito para",idx_feat_h2b:"uso real.",
+    feat1_title:"Grátis. Sempre.",feat1_desc:"Sem cartão, sem assinatura. Google para ilimitado — para sempre.",
+    feat2_title:"Menos de 5 segundos",feat2_desc:"Processamento por IA. Sem filas, sem espera.",
+    feat3_title:"Sem dados armazenados",feat3_desc:"Imagens processadas na memória e descartadas imediatamente.",
+    feat4_title:"Saída em alta resolução",feat4_desc:"Exporte na resolução original como PNG sem perdas.",
+    feat5_title:"Acesso à API",feat5_desc:"Gere chaves API da sua conta.",
+    feat6_title:"12 idiomas",feat6_desc:"Disponível em português, inglês, hindi, árabe, espanhol, francês, alemão, chinês, japonês e mais.",
+    faq_tag:"FAQ",faq_h2a:"Perguntas",faq_h2b:"frequentes",
+    faq1_q:"RemoveAnything é realmente grátis?",faq1_a:"Sim. 3 processamentos grátis sem conta. Entre com Google para ilimitado.",
+    faq2_q:"Por que apenas login com Google?",faq2_a:"É o jeito mais rápido e seguro. Sem senhas, sem verificação por e-mail.",
+    faq3_q:"Minhas imagens são armazenadas?",faq3_a:"Não. Processadas na memória e descartadas imediatamente.",
+    faq4_q:"Quais marcas d'água você remove?",faq4_a:"Marcas Nano Banana (Nano AI). Midjourney e DALL·E em breve.",
+    faq5_q:"Posso usar RemoveAnything via API?",faq5_a:"Sim! Entre com Google, clique em \"API Keys\" e gere suas chaves. Envie pedidos com o cabeçalho <code>X-API-Key</code>.",
+    faq6_q:"Quais formatos de imagem são suportados?",faq6_a:"PNG, JPG/JPEG, WebP, BMP e TIFF. A saída é sempre PNG em resolução completa.",
+    bg_hero_tag:"Remoção de fundo por IA",bg_hero_h1a:"Remover",bg_hero_h1b:"Fundo.",
+    bg_hero_sub:"IA remove qualquer fundo em segundos. Saída transparente, branca ou preta.",
+    bg_pill1:"3 tentativas grátis",bg_pill2:"Até 20 MB",bg_pill3:"PNG sem perdas",
+    bg_card_title:"Removedor de fundo",bg_live:"ao vivo",
+    dz_title:"Solte sua imagem aqui",dz_sub_pre:"ou",dz_sub_browse:"procurar arquivos",dz_sub_post:"· colar também funciona",
+    output_label:"Saída:",mode_transparent:"Transparente",mode_white:"Fundo branco",mode_black:"Fundo preto",
+    tab_compare:"Comparar",tab_original:"Original",tab_result:"Resultado",
+    panel_original:"Original",panel_result:"Resultado",
+    ph_text:"aguardando processamento",overlay_removing_bg:"removendo fundo…",
+    btn_proc_bg:"Remover fundo",btn_dl:"Baixar PNG",btn_new:"Nova imagem",processing:"processando…",
+    hist_label:"Recentes",hist_empty:"Nada ainda — solte uma imagem acima",
+    bg_how_tag:"Como funciona",bg_how_h2:"Automático.",bg_how_h2b:"Preciso.",
+    bg_step1_num:"Passo 01",bg_step1_title:"Envie qualquer imagem",bg_step1_desc:"PNG, JPG, WebP, BMP ou TIFF até 20 MB.",
+    bg_step2_num:"Passo 02",bg_step2_title:"IA detecta o sujeito",bg_step2_desc:"Modelo de aprendizado profundo identifica o primeiro plano com precisão.",
+    bg_step3_num:"Passo 03",bg_step3_title:"Escolha a saída",bg_step3_desc:"PNG transparente, fundo branco ou preto.",
+    bg_step4_num:"Passo 04",bg_step4_title:"Baixe o resultado",bg_step4_desc:"PNG sem perdas em resolução completa.",
+    nb_hero_tag:"Marca d'água Gemini Nano AI",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Remoção.",
+    nb_hero_sub:"Remove a marca d'água estrela do Gemini por inversão alfa matematicamente exata.",
+    nb_pill1:"Inversão alfa",nb_pill2:"Perfeito por pixel",nb_pill3:"Sem perda de qualidade",
+    nb_card_title:"Removedor de marca Gemini Nano Banana",
+    nb_dz_title:"Solte imagem Gemini / Nano AI aqui",nb_dz_sub:"ou procurar arquivos · a marca estrela será removida",
+    nb_panel_orig:"Original (com marca Gemini)",nb_panel_res:"Resultado (marca removida)",
+    overlay_removing_nb:"removendo marca Gemini…",
+    btn_proc_nb:"Remover marca",nb_proc_stat:"removendo marca…",
+    tab_before:"Antes",tab_after:"Depois",view_before:"Antes",view_after:"Depois",
+    nb_how_tag:"Como funciona",nb_how_h2a:"Matematicamente exato,",nb_how_h2b:"não adivinhação de IA.",
+    nb_step1_num:"Passo 01",nb_step1_title:"Envie imagem Gemini / Nano",nb_step1_desc:"Qualquer imagem com a marca semitransparente do Gemini no canto inferior direito.",
+    nb_step2_num:"Passo 02",nb_step2_title:"Marca localizada",nb_step2_desc:"Detecção automática: 48×48px para imagens pequenas, 96×96px acima de 1024px.",
+    nb_step3_num:"Passo 03",nb_step3_title:"Inversão alfa",nb_step3_desc:"Matemática exata: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Passo 04",nb_step4_title:"Resultado perfeito por pixel",nb_step4_desc:"Valores de pixel recuperados com precisão — sem inpainting, sem adivinhação."
+  },
+  ru:{
+    nav_home:"Главная",nav_bg:"Убрать фон",nav_nano:"Нано Банан",nav_login:"Войти",nav_signup:"Регистрация",nav_api:"API-ключи",
+    btn_google:"Войти через Google",logout_title:"Выйти?",cancel:"Отмена",logout_btn:"Выйти",
+    toast_signedin:"Вошли!",toast_admin:"Добро пожаловать!",toast_out:"Вышли.",
+    idx_hero_tag:"ИИ · Бесплатно · Приватно",idx_hero_sub:"Фоны, водяные знаки — исчезают за секунды. Без потери качества.",
+    idx_pill1:"3 бесплатных попытки",idx_pill2:"Бесплатный аккаунт = безлимит",idx_pill3:"Данные не сохраняются",
+    tile_bg_label:"Фон",tile_bg_title:"Удаление фона",tile_bg_desc:"ИИ удаляет фон с любого изображения.",
+    tile_nano_label:"Водяной знак",tile_nano_title:"Нано Банан",tile_nano_desc:"Удаляет баннер Nano AI с помощью умного инпейнтинга.",
+    tile_soon_label:"Скоро",tile_soon_title:"Ещё инструменты",tile_soon_desc:"Удаление водяных знаков Midjourney, DALL·E — в разработке.",
+    idx_how_tag:"Как это работает",idx_how_h2a:"Три шага.",idx_how_h2b:"Секунды.",
+    idx_step1_num:"Шаг 01",idx_step1_title:"Загрузите изображение",idx_step1_desc:"Перетащите, вставьте или выберите. До 20 МБ.",
+    idx_step2_num:"Шаг 02",idx_step2_title:"ИИ делает работу",idx_step2_desc:"Наш движок автоматически обнаруживает и удаляет водяные знаки или фон.",
+    idx_step3_num:"Шаг 03",idx_step3_title:"Скачайте результат",idx_step3_desc:"PNG в полном разрешении, без потери качества.",
+    idx_step4_num:"Шаг 04",idx_step4_title:"Всегда бесплатно",idx_step4_desc:"3 бесплатных попытки без аккаунта. Войдите через Google для безлимита.",
+    idx_feat_tag:"Почему RemoveAnything",idx_feat_h2a:"Создано для",idx_feat_h2b:"реального использования.",
+    feat1_title:"Бесплатно. Всегда.",feat1_desc:"Без карты, без подписки. Google для безлимита — навсегда.",
+    feat2_title:"Меньше 5 секунд",feat2_desc:"Обработка ИИ. Без очередей и ожидания.",
+    feat3_title:"Данные не сохраняются",feat3_desc:"Изображения обрабатываются в памяти и сразу удаляются.",
+    feat4_title:"Полное разрешение",feat4_desc:"Экспорт в исходном разрешении как PNG без потерь.",
+    feat5_title:"API доступ",feat5_desc:"Создавайте API-ключи из своего аккаунта.",
+    feat6_title:"12 языков",feat6_desc:"Доступно на русском, английском, хинди, арабском, испанском, французском, немецком, китайском, японском и других.",
+    faq_tag:"FAQ",faq_h2a:"Частые",faq_h2b:"вопросы",
+    faq1_q:"RemoveAnything действительно бесплатный?",faq1_a:"Да. 3 бесплатных обработки без аккаунта. Войдите через Google для безлимита.",
+    faq2_q:"Почему только Google вход?",faq2_a:"Это самый быстрый и безопасный способ. Без паролей, без подтверждения email.",
+    faq3_q:"Мои изображения сохраняются на сервере?",faq3_a:"Нет. Обрабатываются в памяти и сразу удаляются.",
+    faq4_q:"Какие водяные знаки вы можете удалить?",faq4_a:"Водяные знаки Nano Banana (Nano AI). Midjourney и DALL·E скоро.",
+    faq5_q:"Можно использовать RemoveAnything через API?",faq5_a:"Да! Войдите через Google, нажмите «API Keys» и создайте ключи. Отправляйте запросы с заголовком <code>X-API-Key</code>.",
+    faq6_q:"Какие форматы изображений поддерживаются?",faq6_a:"PNG, JPG/JPEG, WebP, BMP и TIFF. Вывод всегда PNG в полном разрешении.",
+    bg_hero_tag:"Удаление фона с ИИ",bg_hero_h1a:"Удаление",bg_hero_h1b:"фона.",
+    bg_hero_sub:"ИИ убирает любой фон за секунды. Прозрачный, белый или чёрный вывод.",
+    bg_pill1:"3 бесплатных попытки",bg_pill2:"До 20 МБ",bg_pill3:"PNG без потерь",
+    bg_card_title:"Удаление фона",bg_live:"живой",
+    dz_title:"Перетащите изображение сюда",dz_sub_pre:"или",dz_sub_browse:"выберите файл",dz_sub_post:"· вставка тоже работает",
+    output_label:"Вывод:",mode_transparent:"Прозрачный",mode_white:"Белый фон",mode_black:"Чёрный фон",
+    tab_compare:"Сравнение",tab_original:"Оригинал",tab_result:"Результат",
+    panel_original:"Оригинал",panel_result:"Результат",
+    ph_text:"ожидание обработки",overlay_removing_bg:"удаление фона…",
+    btn_proc_bg:"Удалить фон",btn_dl:"Скачать PNG",btn_new:"Новое изображение",processing:"обработка…",
+    hist_label:"Недавние",hist_empty:"Пусто — перетащите изображение выше",
+    bg_how_tag:"Как это работает",bg_how_h2:"Автоматически.",bg_how_h2b:"Точно.",
+    bg_step1_num:"Шаг 01",bg_step1_title:"Загрузите любое изображение",bg_step1_desc:"PNG, JPG, WebP, BMP или TIFF до 20 МБ.",
+    bg_step2_num:"Шаг 02",bg_step2_title:"ИИ обнаруживает объект",bg_step2_desc:"Модель глубокого обучения с точностью до края идентифицирует передний план.",
+    bg_step3_num:"Шаг 03",bg_step3_title:"Выберите вывод",bg_step3_desc:"Прозрачный PNG, белый или чёрный фон.",
+    bg_step4_num:"Шаг 04",bg_step4_title:"Скачайте результат",bg_step4_desc:"PNG без потерь в полном разрешении.",
+    nb_hero_tag:"Водяной знак Gemini Nano AI",nb_hero_h1a:"Нано Банан",nb_hero_h1b:"Удаление.",
+    nb_hero_sub:"Удаляет звёздный водяной знак Gemini методом математически точного обратного альфа-смешивания.",
+    nb_pill1:"Обратное альфа-смешивание",nb_pill2:"Точность до пикселя",nb_pill3:"Без потери качества",
+    nb_card_title:"Удаление водяного знака Gemini Nano Banana",
+    nb_dz_title:"Перетащите изображение Gemini / Nano AI сюда",nb_dz_sub:"или выберите файл · звёздный водяной знак будет удалён",
+    nb_panel_orig:"Оригинал (с водяным знаком Gemini)",nb_panel_res:"Результат (водяной знак удалён)",
+    overlay_removing_nb:"удаление водяного знака Gemini…",
+    btn_proc_nb:"Удалить водяной знак",nb_proc_stat:"удаление водяного знака…",
+    tab_before:"До",tab_after:"После",view_before:"До",view_after:"После",
+    nb_how_tag:"Как это работает",nb_how_h2a:"Математически точно,",nb_how_h2b:"без угадывания ИИ.",
+    nb_step1_num:"Шаг 01",nb_step1_title:"Загрузите изображение Gemini / Nano",nb_step1_desc:"Любое изображение с полупрозрачным звёздным водяным знаком Gemini в правом нижнем углу.",
+    nb_step2_num:"Шаг 02",nb_step2_title:"Водяной знак обнаружен",nb_step2_desc:"Автообнаружение: 48×48 пкс для малых изображений, 96×96 пкс для изображений свыше 1024 пкс.",
+    nb_step3_num:"Шаг 03",nb_step3_title:"Обратное альфа-смешивание",nb_step3_desc:"Точная формула: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Шаг 04",nb_step4_title:"Идеальный результат",nb_step4_desc:"Исходные значения пикселей восстановлены точно — без инпейнтинга, без угадывания."
+  },
+  ko:{
+    nav_home:"홈",nav_bg:"배경 제거",nav_nano:"나노 바나나",nav_login:"로그인",nav_signup:"회원가입",nav_api:"API 키",
+    btn_google:"Google로 계속",logout_title:"로그아웃?",cancel:"취소",logout_btn:"로그아웃",
+    toast_signedin:"로그인됨!",toast_admin:"환영합니다!",toast_out:"로그아웃됨.",
+    idx_hero_tag:"AI 기반 · 무료 · 프라이빗",idx_hero_sub:"배경, AI 워터마크 — 초 만에 사라집니다. 품질 손실 없음.",
+    idx_pill1:"3회 무료 시도",idx_pill2:"무료 계정 = 무제한",idx_pill3:"데이터 저장 없음",
+    tile_bg_label:"배경",tile_bg_title:"배경 제거",tile_bg_desc:"AI가 모든 이미지에서 배경을 제거합니다.",
+    tile_nano_label:"워터마크",tile_nano_title:"나노 바나나",tile_nano_desc:"스마트 인페인팅으로 Nano AI 하단 배너를 제거합니다.",
+    tile_soon_label:"출시 예정",tile_soon_title:"더 많은 도구",tile_soon_desc:"Midjourney, DALL·E 워터마크 제거 — 개발 중.",
+    idx_how_tag:"사용 방법",idx_how_h2a:"세 단계.",idx_how_h2b:"초 만에.",
+    idx_step1_num:"단계 01",idx_step1_title:"이미지 업로드",idx_step1_desc:"드롭, 붙여넣기 또는 찾아보기. 최대 20 MB.",
+    idx_step2_num:"단계 02",idx_step2_title:"AI가 처리",idx_step2_desc:"엔진이 워터마크 또는 배경을 자동으로 감지하여 제거합니다.",
+    idx_step3_num:"단계 03",idx_step3_title:"결과 다운로드",idx_step3_desc:"전체 해상도 PNG, 품질 손실 없음.",
+    idx_step4_num:"단계 04",idx_step4_title:"항상 무료",idx_step4_desc:"계정 없이 3회 무료. Google로 로그인하면 무제한.",
+    idx_feat_tag:"왜 RemoveAnything인가",idx_feat_h2a:"실제 사용을 위해",idx_feat_h2b:"만들어졌습니다.",
+    feat1_title:"무료. 항상.",feat1_desc:"카드 없음, 구독 없음. Google로 무제한 — 영원히.",
+    feat2_title:"5초 미만",feat2_desc:"AI 처리. 대기열 없음.",
+    feat3_title:"데이터 저장 없음",feat3_desc:"이미지는 메모리에서 처리 후 즉시 삭제됩니다.",
+    feat4_title:"전체 해상도 출력",feat4_desc:"원본 해상도로 무손실 PNG 내보내기.",
+    feat5_title:"API 액세스",feat5_desc:"계정에서 API 키를 생성하세요.",
+    feat6_title:"12개 언어",feat6_desc:"한국어, 영어, 힌디어, 아랍어, 스페인어, 프랑스어, 독일어, 중국어, 일본어 등 지원.",
+    faq_tag:"자주 묻는 질문",faq_h2a:"자주 묻는",faq_h2b:"질문",
+    faq1_q:"RemoveAnything은 정말 무료인가요?",faq1_a:"네. 계정 없이 3회 무료. Google로 로그인하면 무제한.",
+    faq2_q:"왜 Google 로그인만 지원하나요?",faq2_a:"가장 빠르고 안전한 방법입니다. 비밀번호 없음, 이메일 인증 없음.",
+    faq3_q:"내 이미지가 서버에 저장되나요?",faq3_a:"아니요. 메모리에서 처리 후 즉시 삭제됩니다.",
+    faq4_q:"어떤 워터마크를 제거할 수 있나요?",faq4_a:"Nano Banana (Nano AI) 하단 배너 워터마크. Midjourney와 DALL·E 곧 지원 예정.",
+    faq5_q:"API로 RemoveAnything을 사용할 수 있나요?",faq5_a:"네! Google로 로그인 후 \"API Keys\"를 클릭하여 키를 생성하세요. <code>X-API-Key</code> 헤더로 요청을 보내세요.",
+    faq6_q:"어떤 이미지 형식이 지원되나요?",faq6_a:"PNG, JPG/JPEG, WebP, BMP, TIFF. 출력은 항상 전체 해상도 PNG입니다.",
+    bg_hero_tag:"AI 배경 제거",bg_hero_h1a:"배경",bg_hero_h1b:"리무버.",
+    bg_hero_sub:"AI가 초 만에 모든 배경을 제거합니다. 전체 해상도로 투명, 흰색 또는 검정 출력.",
+    bg_pill1:"3회 무료 시도",bg_pill2:"최대 20 MB",bg_pill3:"무손실 PNG",
+    bg_card_title:"배경 리무버",bg_live:"라이브",
+    dz_title:"여기에 이미지를 드롭하세요",dz_sub_pre:"또는",dz_sub_browse:"파일 찾아보기",dz_sub_post:"· 붙여넣기도 가능",
+    output_label:"출력:",mode_transparent:"투명",mode_white:"흰 배경",mode_black:"검정 배경",
+    tab_compare:"비교",tab_original:"원본",tab_result:"결과",
+    panel_original:"원본",panel_result:"결과",
+    ph_text:"처리 대기 중",overlay_removing_bg:"배경 제거 중…",
+    btn_proc_bg:"배경 제거",btn_dl:"PNG 다운로드",btn_new:"새 이미지",processing:"처리 중…",
+    hist_label:"최근",hist_empty:"아직 없음 — 위에 이미지를 드롭하세요",
+    bg_how_tag:"사용 방법",bg_how_h2:"자동.",bg_how_h2b:"정밀.",
+    bg_step1_num:"단계 01",bg_step1_title:"이미지 업로드",bg_step1_desc:"최대 20 MB의 PNG, JPG, WebP, BMP 또는 TIFF.",
+    bg_step2_num:"단계 02",bg_step2_title:"AI가 피사체 감지",bg_step2_desc:"딥러닝 모델이 엣지 정밀도로 전경을 식별합니다.",
+    bg_step3_num:"단계 03",bg_step3_title:"출력 선택",bg_step3_desc:"투명 PNG, 단색 흰색 또는 검정 배경.",
+    bg_step4_num:"단계 04",bg_step4_title:"결과 다운로드",bg_step4_desc:"전체 해상도 무손실 PNG.",
+    nb_hero_tag:"Gemini Nano AI 워터마크",nb_hero_h1a:"나노 바나나",nb_hero_h1b:"리무버.",
+    nb_hero_sub:"수학적으로 정확한 역 알파 블렌딩으로 Nano AI 이미지의 Gemini 별 워터마크를 제거합니다.",
+    nb_pill1:"역 알파 블렌딩",nb_pill2:"픽셀 완벽",nb_pill3:"품질 손실 없음",
+    nb_card_title:"Gemini Nano Banana 워터마크 리무버",
+    nb_dz_title:"여기에 Gemini / Nano AI 이미지를 드롭하세요",nb_dz_sub:"또는 파일 찾아보기 · Gemini 별 워터마크가 제거됩니다",
+    nb_panel_orig:"원본 (Gemini 워터마크 포함)",nb_panel_res:"결과 (워터마크 제거됨)",
+    overlay_removing_nb:"Gemini 워터마크 제거 중…",
+    btn_proc_nb:"워터마크 제거",nb_proc_stat:"워터마크 제거 중…",
+    tab_before:"이전",tab_after:"이후",view_before:"이전",view_after:"이후",
+    nb_how_tag:"사용 방법",nb_how_h2a:"수학적으로 정확,",nb_how_h2b:"AI 추측 아님.",
+    nb_step1_num:"단계 01",nb_step1_title:"Gemini / Nano 이미지 업로드",nb_step1_desc:"오른쪽 하단에 Gemini 반투명 별 워터마크가 있는 이미지.",
+    nb_step2_num:"단계 02",nb_step2_title:"워터마크 위치 확인",nb_step2_desc:"자동 감지: 소형 이미지 48×48px, 1024px 초과 이미지 96×96px.",
+    nb_step3_num:"단계 03",nb_step3_title:"역 알파 블렌딩",nb_step3_desc:"정확한 수식: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"단계 04",nb_step4_title:"픽셀 완벽한 결과",nb_step4_desc:"원본 픽셀 값 정확히 복원 — 인페인팅 없음, 추측 없음."
+  },
+  tr:{
+    nav_home:"Anasayfa",nav_bg:"Arka plan kaldır",nav_nano:"Nano Banana",nav_login:"Giriş",nav_signup:"Kaydol",nav_api:"API Anahtarları",
+    btn_google:"Google ile devam",logout_title:"Çıkış?",cancel:"İptal",logout_btn:"Çıkış",
+    toast_signedin:"Giriş yapıldı!",toast_admin:"Hoş geldiniz!",toast_out:"Çıkış yapıldı.",
+    idx_hero_tag:"AI Destekli · Ücretsiz · Gizli",idx_hero_sub:"Arka planlar, AI filigranları — saniyeler içinde gider. Kalite kaybı yok.",
+    idx_pill1:"3 ücretsiz deneme",idx_pill2:"Ücretsiz hesap = sınırsız",idx_pill3:"Veri saklanmaz",
+    tile_bg_label:"Arka Plan",tile_bg_title:"Arka plan kaldır",tile_bg_desc:"AI herhangi bir görüntüden arka planı kaldırır.",
+    tile_nano_label:"Filigran",tile_nano_title:"Nano Banana",tile_nano_desc:"Akıllı inpainting ile Nano AI alt başlığını kaldırır.",
+    tile_soon_label:"Yakında",tile_soon_title:"Daha fazla araç",tile_soon_desc:"Midjourney, DALL·E filigran kaldırma — geliştiriliyor.",
+    idx_how_tag:"Nasıl çalışır",idx_how_h2a:"Üç adım.",idx_how_h2b:"Saniyeler.",
+    idx_step1_num:"Adım 01",idx_step1_title:"Görüntünüzü yükleyin",idx_step1_desc:"Bırakın, yapıştırın veya göz atın. 20 MB'a kadar.",
+    idx_step2_num:"Adım 02",idx_step2_title:"AI işi yapıyor",idx_step2_desc:"Motorumuz filigranları veya arka planları otomatik algılar ve kaldırır.",
+    idx_step3_num:"Adım 03",idx_step3_title:"Sonucu indirin",idx_step3_desc:"Tam çözünürlüklü PNG, sıfır kalite kaybı.",
+    idx_step4_num:"Adım 04",idx_step4_title:"Her zaman ücretsiz",idx_step4_desc:"Hesap olmadan 3 ücretsiz deneme. Sınırsız için Google ile giriş yapın.",
+    idx_feat_tag:"Neden RemoveAnything",idx_feat_h2a:"Gerçek kullanım için",idx_feat_h2b:"tasarlandı.",
+    feat1_title:"Ücretsiz. Her Zaman.",feat1_desc:"Kart yok, abonelik yok. Google ile sınırsız — sonsuza kadar.",
+    feat2_title:"5 saniyenin altında",feat2_desc:"AI destekli işlem. Kuyruk yok, bekleme yok.",
+    feat3_title:"Veri saklanmaz",feat3_desc:"Görüntüler bellekte işlenir ve hemen silinir.",
+    feat4_title:"Tam çözünürlük çıktısı",feat4_desc:"Kayıpsız PNG olarak orijinal çözünürlükte dışa aktarın.",
+    feat5_title:"API Erişimi",feat5_desc:"Hesabınızdan API anahtarları oluşturun.",
+    feat6_title:"12 Dil",feat6_desc:"Türkçe, İngilizce, Hintçe, Arapça, İspanyolca, Fransızca, Almanca, Çince, Japonca ve daha fazlasında mevcut.",
+    faq_tag:"SSS",faq_h2a:"Sık Sorulan",faq_h2b:"Sorular",
+    faq1_q:"RemoveAnything gerçekten ücretsiz mi?",faq1_a:"Evet. Hesap olmadan 3 ücretsiz işlem. Sınırsız için Google ile giriş yapın.",
+    faq2_q:"Neden yalnızca Google girişi?",faq2_a:"En hızlı ve güvenli yol. Şifre yok, e-posta doğrulaması yok.",
+    faq3_q:"Görüntülerim sunucularınızda saklanıyor mu?",faq3_a:"Hayır. Bellekte işlenir ve hemen silinir.",
+    faq4_q:"Hangi filigranları kaldırabilirsiniz?",faq4_a:"Nano Banana (Nano AI) alt başlık filigranları. Midjourney ve DALL·E yakında.",
+    faq5_q:"RemoveAnything'i API üzerinden kullanabilir miyim?",faq5_a:"Evet! Google ile giriş yapın, \"API Keys\"e tıklayın ve anahtarlarınızı oluşturun. <code>X-API-Key</code> başlığıyla istek gönderin.",
+    faq6_q:"Hangi görüntü biçimleri destekleniyor?",faq6_a:"PNG, JPG/JPEG, WebP, BMP ve TIFF. Çıktı her zaman tam çözünürlüklü PNG'dir.",
+    bg_hero_tag:"AI Arka Plan Kaldırma",bg_hero_h1a:"Arka Plan",bg_hero_h1b:"Kaldırıcı.",
+    bg_hero_sub:"AI saniyeler içinde herhangi bir arka planı kaldırır. Tam çözünürlükte şeffaf, beyaz veya siyah çıktı.",
+    bg_pill1:"3 ücretsiz deneme",bg_pill2:"20 MB'a kadar",bg_pill3:"Kayıpsız PNG",
+    bg_card_title:"Arka Plan Kaldırıcı",bg_live:"canlı",
+    dz_title:"Görüntünüzü buraya bırakın",dz_sub_pre:"veya",dz_sub_browse:"dosyalara göz atın",dz_sub_post:"· yapıştırma da çalışır",
+    output_label:"Çıktı:",mode_transparent:"Şeffaf",mode_white:"Beyaz Arka Plan",mode_black:"Siyah Arka Plan",
+    tab_compare:"Karşılaştır",tab_original:"Orijinal",tab_result:"Sonuç",
+    panel_original:"Orijinal",panel_result:"Sonuç",
+    ph_text:"işlem bekleniyor",overlay_removing_bg:"arka plan kaldırılıyor…",
+    btn_proc_bg:"Arka Planı Kaldır",btn_dl:"PNG İndir",btn_new:"Yeni Görüntü",processing:"işleniyor…",
+    hist_label:"Son Kullanılanlar",hist_empty:"Henüz yok — yukarıya bir görüntü bırakın",
+    bg_how_tag:"Nasıl çalışır",bg_how_h2:"Otomatik.",bg_how_h2b:"Hassas.",
+    bg_step1_num:"Adım 01",bg_step1_title:"Herhangi bir görüntü yükleyin",bg_step1_desc:"20 MB'a kadar PNG, JPG, WebP, BMP veya TIFF.",
+    bg_step2_num:"Adım 02",bg_step2_title:"AI konuyu algılar",bg_step2_desc:"Derin öğrenme modeli, kenar hassasiyetiyle ön planı tanımlar.",
+    bg_step3_num:"Adım 03",bg_step3_title:"Çıktı seçin",bg_step3_desc:"Şeffaf PNG, düz beyaz veya siyah arka plan.",
+    bg_step4_num:"Adım 04",bg_step4_title:"Sonucu indirin",bg_step4_desc:"Tam çözünürlüklü kayıpsız PNG.",
+    nb_hero_tag:"Gemini Nano AI Filigranı",nb_hero_h1a:"Nano Banana",nb_hero_h1b:"Kaldırıcı.",
+    nb_hero_sub:"Matematiksel olarak tam ters alfa karıştırma ile Nano AI görüntülerindeki Gemini yıldız filigranını kaldırır.",
+    nb_pill1:"Ters Alfa Karıştırma",nb_pill2:"Piksel Mükemmel",nb_pill3:"Sıfır Kalite Kaybı",
+    nb_card_title:"Gemini Nano Banana Filigran Kaldırıcı",
+    nb_dz_title:"Gemini / Nano AI görüntüsünü buraya bırakın",nb_dz_sub:"veya dosyalara göz atın · Gemini yıldız filigranı kaldırılacak",
+    nb_panel_orig:"Orijinal (Gemini filigranıyla)",nb_panel_res:"Sonuç (filigran kaldırıldı)",
+    overlay_removing_nb:"Gemini filigranı kaldırılıyor…",
+    btn_proc_nb:"Filigranı Kaldır",nb_proc_stat:"filigran kaldırılıyor…",
+    tab_before:"Önce",tab_after:"Sonra",view_before:"Önce",view_after:"Sonra",
+    nb_how_tag:"Nasıl çalışır",nb_how_h2a:"Matematiksel olarak tam,",nb_how_h2b:"AI tahmini değil.",
+    nb_step1_num:"Adım 01",nb_step1_title:"Gemini / Nano görüntüsü yükleyin",nb_step1_desc:"Sağ alt köşede Gemini yarı saydam yıldız filigranı olan herhangi bir görüntü.",
+    nb_step2_num:"Adım 02",nb_step2_title:"Filigran konumlandı",nb_step2_desc:"Otomatik algılama: küçük görüntüler için 48×48px, 1024px üzeri için 96×96px.",
+    nb_step3_num:"Adım 03",nb_step3_title:"Ters alfa karıştırma",nb_step3_desc:"Tam matematik: original = (blended − α×255) / (1−α).",
+    nb_step4_num:"Adım 04",nb_step4_title:"Piksel mükemmel sonuç",nb_step4_desc:"Orijinal piksel değerleri kesin olarak kurtarıldı — inpainting yok, tahmin yok."
+  }
+};
+
+var _curLang = localStorage.getItem('ra_lang') || 'en';
+
+/* ═══════════════════════════════════════════════════
+   RA MAIN OBJECT
+════════════════════════════════════════════════════ */
+window.RA = {
+  user: null,
+  authReady: false,
+  _newKey: null,
+  _langOpen: false,
+
+  /* ─── Translation ─── */
+  t: function(k) {
+    return (_T[_curLang] && _T[_curLang][k]) || (_T.en[k]) || k;
+  },
+
+  applyLang: function() {
+    var lang = _curLang;
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var k = el.getAttribute('data-i18n');
+      var v = RA.t(k);
+      if (v) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+      var k = el.getAttribute('data-i18n-html');
+      var v = RA.t(k);
+      if (v) el.innerHTML = v;
+    });
+    var info = _LANGS[lang] || _LANGS.en;
+    var flagEl = document.getElementById('lang-flag-display');
+    var codeEl = document.getElementById('lang-code-display');
+    if (flagEl) flagEl.textContent = info.flag;
+    if (codeEl) codeEl.textContent = info.code;
+    /* Mark active option */
+    document.querySelectorAll('.lang-opt').forEach(function(opt) {
+      opt.classList.toggle('active', opt.dataset.lang === lang);
+    });
+    /* RTL for Arabic — only flip text direction, NOT the panel position */
+    document.getElementById('html-root').setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  },
+
+  setLang: function(lang) {
+    _curLang = lang;
+    localStorage.setItem('ra_lang', lang);
+    this.applyLang();
+    this.closeLangPanel();
+  },
+
+  toggleLangPanel: function(e) {
+    e.stopPropagation();
+    var panel = document.getElementById('lang-panel');
+    var open = panel.classList.contains('open');
+    if (open) { this.closeLangPanel(); return; }
+    /* Reset any runtime position overrides so CSS controls direction (downward) */
+    panel.style.top = '';
+    panel.style.bottom = 'auto';
+    panel.classList.add('open');
+    this._langOpen = true;
+    var inp = document.getElementById('lang-search-input');
+    if (inp) { inp.value = ''; this._filterLangs(''); }
+    /* Scroll active language into view after panel opens */
+    setTimeout(function() {
+      if (inp) inp.focus();
+      var activeOpt = document.querySelector('.lang-opt.active');
+      if (activeOpt) activeOpt.scrollIntoView({ block: 'nearest' });
+    }, 80);
+  },
+
+  closeLangPanel: function() {
+    document.getElementById('lang-panel').classList.remove('open');
+    this._langOpen = false;
+  },
+
+  _filterLangs: function(q) {
+    var opts = document.querySelectorAll('.lang-opt');
+    var any = false;
+    opts.forEach(function(opt) {
+      var search = (opt.dataset.search || '') + ' ' + (opt.querySelector('.lang-name') ? opt.querySelector('.lang-name').textContent : '');
+      var match = !q || search.toLowerCase().includes(q.toLowerCase());
+      opt.classList.toggle('hidden', !match);
+      if (match) any = true;
+    });
+    var nr = document.getElementById('lang-no-results');
+    if (nr) nr.style.display = any ? 'none' : 'block';
+  },
+
+  /* ─── Toasts ─── */
+  toast: function(msg, type) {
+    var w = document.getElementById('toast-container'); if (!w) return;
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type || 'green'); t.textContent = msg; w.appendChild(t);
+    setTimeout(function(){ t.classList.add('out'); setTimeout(function(){ t.remove(); }, 260); }, 3200);
+  },
+
+  /* ─── Auth Modal ─── */
+  openAuth: function() {
+    document.getElementById('modal-notice').textContent = 'Sign in with Google for unlimited access.';
+    this._clearAuthErr();
+    document.getElementById('auth-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+  openAuthLimit: function() {
+    document.getElementById('modal-notice').textContent = "You've used all 3 free tries — sign in for unlimited.";
+    this._clearAuthErr();
+    document.getElementById('auth-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+  closeAuth: function() {
+    document.getElementById('auth-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    this._setAuthLoading(false);
+  },
+  _clearAuthErr: function() {
+    var e = document.getElementById('modal-err'); e.style.display = 'none'; e.textContent = '';
+  },
+  _showAuthErr: function(msg) {
+    var e = document.getElementById('modal-err'); e.textContent = msg; e.style.display = 'block';
+  },
+  _setAuthLoading: function(on) {
+    var sp = document.getElementById('modal-spin');
+    var gb = document.getElementById('btn-google-signin');
+    if (sp) sp.style.display = on ? 'block' : 'none';
+    if (gb) gb.disabled = on;
+  },
+
+  /* ─── Logout ─── */
+  showLogout: function() {
+    document.getElementById('logout-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+  closeLogout: function() {
+    document.getElementById('logout-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  },
+  doLogout: function() {
+    this.closeLogout();
+    var self = this;
+    var done = function() {
+      fetch('/auth/logout', {method:'POST', credentials:'include'}).catch(function(){});
+      self.user = null; self.setNavGuest(); self.toast(self.t('toast_out'), 'blue');
+      setTimeout(function(){ location.reload(); }, 600);
+    };
+    if (window._fbAuth) window._fbAuth.signOut().then(done).catch(done);
+    else done();
+  },
+
+  /* ─── Google Sign-In ─── */
+  signInGoogle: function() {
+    var self = this;
+    if (!window._fbAuth || !window._fbGP) {
+      this._showAuthErr('Auth service not ready — refresh and try again.'); return;
+    }
+    this._clearAuthErr(); this._setAuthLoading(true);
+    window._fbAuth.signInWithPopup(window._fbGP)
+      .catch(function(e) {
+        if (e.code !== 'auth/popup-closed-by-user') {
+          self._showAuthErr(e.message || 'Sign-in failed. Try again.');
+        }
+        self._setAuthLoading(false);
+      });
+    /* onAuthStateChanged handles the rest */
+  },
+
+  /* ─── Sync session with Flask ─── */
+  syncSession: async function(user) {
+    try {
+      /* force=true ensures we get a fresh token, avoiding cached expired tokens */
+      var tok = await user.getIdToken(true);
+      var r = await fetch('/auth/verify', {
+        method: 'POST', credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({idToken: tok})
+      });
+      if (!r.ok) {
+        var errData = null;
+        try { errData = await r.json(); } catch(e2) {}
+        console.warn('syncSession failed:', r.status, errData);
+        return null;
+      }
+      return await r.json();
+    } catch(e) {
+      console.warn('syncSession error:', e);
+      return null;
+    }
+  },
+
+  /* ─── Auth state handler ─── */
+  onUser: async function(user, isFirst) {
+    this.user = user || null;
+    this.authReady = true;
+    if (user) {
+      var res = await this.syncSession(user);
+      this.setNavUser(user);
+      this._setAuthLoading(false);
+      this.closeAuth();
+
+      var isAdminNeeded = res && res.needs_admin_password;
+
+      if (isAdminNeeded) {
+        /* Admin must complete password step at /admin */
+        var onAdminPage = window.location.pathname.startsWith('/admin');
+        if (!onAdminPage) {
+          /* Redirect to /admin password step — cookie is already set by syncSession */
+          if (!isFirst) this.toast(this.t('toast_admin'), 'blue');
+          setTimeout(function(){ window.location.href = '/admin'; }, isFirst ? 0 : 600);
+        }
+        /* If already on /admin, Flask shows password_step automatically */
+      } else if (!isFirst) {
+        this.toast(this.t('toast_signedin'), 'green');
+      }
+    } else {
+      this.setNavGuest();
+    }
+  },
+
+  /* ─── Nav state ─── */
+  setNavUser: function(user) {
+    var lg = document.getElementById('nav-login');
+    var sg = document.getElementById('nav-signup');
+    var ak = document.getElementById('nav-apikey');
+    if (!lg || !sg) return;
+    lg.style.display = 'none';
+    sg.textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'Account');
+    sg.setAttribute('onclick', 'RA.showLogout()');
+    if (ak) ak.style.display = '';
+  },
+  setNavGuest: function() {
+    var lg = document.getElementById('nav-login');
+    var sg = document.getElementById('nav-signup');
+    var ak = document.getElementById('nav-apikey');
+    if (!lg || !sg) return;
+    lg.style.display = '';
+    sg.textContent = this.t('nav_signup');
+    sg.setAttribute('onclick', 'RA.openAuth()');
+    if (ak) ak.style.display = 'none';
+  },
+
+  /* ─── API Keys ─── */
+  openApiKeys: async function() {
+    this._newKey = null;
+    document.getElementById('new-key-banner').style.display = 'none';
+    document.getElementById('apikeys-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    await this._loadApiKeys();
+  },
+  closeApiKeys: function() {
+    document.getElementById('apikeys-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  },
+
+  /* Ensure Flask session is fresh before making authenticated requests.
+     Firebase tokens expire after 1 hour; this re-syncs if needed. */
+  _ensureSession: async function() {
+    if (!window._fbAuth || !window._fbAuth.currentUser) return false;
+    try {
+      /* force=true gets a fresh token even if the cached one is still valid */
+      var tok = await window._fbAuth.currentUser.getIdToken(false);
+      var r = await fetch('/auth/verify', {
+        method: 'POST', credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({idToken: tok})
+      });
+      return r.ok;
+    } catch(e) { return false; }
+  },
+
+  _loadApiKeys: async function() {
+    var box = document.getElementById('apikeys-list-box');
+    box.innerHTML = '<div class="apikeys-loading">Loading…</div>';
+    try {
+      var r = await fetch('/api/keys', {credentials: 'include'});
+
+      /* Session lost — try to re-sync Firebase token then retry once */
+      if (r.status === 401) {
+        var ok = await this._ensureSession();
+        if (ok) {
+          r = await fetch('/api/keys', {credentials: 'include'});
+        }
+      }
+
+      if (r.status === 401) {
+        box.innerHTML = '<div class="apikeys-error">Session expired — please sign out and sign in again, then reopen API Keys.</div>';
+        return;
+      }
+
+      var d = await r.json();
+      if (d.error) { box.innerHTML = '<div class="apikeys-error">' + _escH(d.error) + '</div>'; return; }
+      var keys = d.keys || [];
+      if (!keys.length) {
+        box.innerHTML = '<div class="apikeys-empty">No API keys yet — create your first one below.</div>';
+        return;
+      }
+      box.innerHTML = keys.map(function(k) {
+        return '<div class="apikey-row" data-id="' + _escH(k.id) + '">'
+          + '<div class="apikey-left">'
+          + '<div class="apikey-name">' + _escH(k.name || 'API Key') + '</div>'
+          + '<div class="apikey-meta"><span class="apikey-preview">' + _escH(k.key_preview) + '</span>&nbsp;&nbsp;'
+          + _escH(String(k.uses)) + ' uses&nbsp;·&nbsp;Last: ' + _escH(k.last_used) + '</div>'
+          + '</div>'
+          + '<button class="apikey-del" onclick="RA._deleteKey(\'' + _escH(k.id) + '\')" title="Delete key">×</button>'
+          + '</div>';
+      }).join('');
+    } catch(e) {
+      box.innerHTML = '<div class="apikeys-error">Network error — ' + _escH(e.message || 'try again') + '</div>';
+    }
+  },
+
+  createApiKey: async function() {
+    var nameInp = document.getElementById('apikey-name-inp');
+    var name = (nameInp.value || '').trim() || 'API Key';
+    var box = document.getElementById('apikeys-list-box');
+    try {
+      /* Re-sync session before creating — avoids 401 on first attempt */
+      await this._ensureSession();
+      var r = await fetch('/api/keys', {
+        method: 'POST', credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name})
+      });
+      if (r.status === 401) {
+        this.toast('Session expired — sign out and sign back in', 'red'); return;
+      }
+      var d = await r.json();
+      if (d.error) { this.toast(d.error, 'red'); return; }
+      this._newKey = d.key;
+      document.getElementById('new-key-val').textContent = d.key;
+      document.getElementById('new-key-banner').style.display = 'block';
+      nameInp.value = '';
+      await this._loadApiKeys();
+      this.toast('API key created — copy it now!', 'green');
+    } catch(e) { this.toast('Failed to create key: ' + (e.message || 'network error'), 'red'); }
+  },
+
+  _deleteKey: async function(kid) {
+    if (!confirm('Delete this API key? This cannot be undone.')) return;
+    try {
+      var r = await fetch('/api/keys/' + kid, {method: 'DELETE', credentials: 'include'});
+      if (!r.ok) { this.toast('Delete failed', 'red'); return; }
+      await this._loadApiKeys();
+      this.toast('Key deleted', 'green');
+    } catch(e) { this.toast('Failed to delete', 'red'); }
+  },
+
+  copyNewKey: function() {
+    if (!this._newKey) return;
+    navigator.clipboard.writeText(this._newKey).then(function(){
+      RA.toast('Key copied to clipboard!', 'green');
+    }).catch(function(){
+      /* fallback */
+      var ta = document.createElement('textarea');
+      ta.value = RA._newKey; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      RA.toast('Key copied!', 'green');
+    });
+  },
+
+  /* ─── Health check ─── */
+  _health: async function() {
+    var dot = document.getElementById('status-dot'); if (!dot) return;
+    try {
+      var r = await fetch('/health', {signal: AbortSignal.timeout(5000)});
+      dot.style.background = r.ok ? 'var(--green)' : 'var(--red)';
+    } catch(e) { dot.style.background = 'var(--red)'; }
+  },
+
+  /* ─── Init ─── */
+  init: function() {
+    var self = this;
+
+    /* Apply saved language */
+    this.applyLang();
+
+    /* Lang filter input */
+    var langInp = document.getElementById('lang-search-input');
+    if (langInp) {
+      langInp.addEventListener('input', function() { RA._filterLangs(this.value); });
+      langInp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          var visible = document.querySelector('.lang-opt:not(.hidden)');
+          if (visible) RA.setLang(visible.dataset.lang);
+        }
+      });
+    }
+
+    /* Lang options click */
+    document.querySelectorAll('.lang-opt').forEach(function(opt) {
+      opt.addEventListener('click', function() { RA.setLang(this.dataset.lang); });
+    });
+
+    /* Close lang panel on outside click */
+    document.addEventListener('click', function(e) {
+      if (self._langOpen && !document.getElementById('lang-wrap').contains(e.target)) {
+        self.closeLangPanel();
+      }
+    });
+
+    /* Overlay clicks */
+    document.getElementById('auth-overlay').addEventListener('click', function(e){ if(e.target.id==='auth-overlay') self.closeAuth(); });
+    document.getElementById('logout-overlay').addEventListener('click', function(e){ if(e.target.id==='logout-overlay') self.closeLogout(); });
+    document.getElementById('apikeys-overlay').addEventListener('click', function(e){ if(e.target.id==='apikeys-overlay') self.closeApiKeys(); });
+
+    /* ESC */
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { self.closeAuth(); self.closeLogout(); self.closeApiKeys(); self.closeLangPanel(); }
+    });
+
+    /* Active nav */
+    var path = window.location.pathname;
+    document.querySelectorAll('.ntab[data-path]').forEach(function(t){
+      t.classList.toggle('active', t.dataset.path === path);
+    });
+
+    /* Health */
+    self._health(); setInterval(function(){ self._health(); }, 30000);
+  }
+};
+
+function _escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('DOMContentLoaded', function(){ RA.init(); });
+</script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  try {
+    var cfg = {{ firebase_config | tojson }};
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    var auth = firebase.auth();
+    window._fbAuth = auth;
+    var gp = new firebase.auth.GoogleAuthProvider();
+    gp.addScope('email'); gp.addScope('profile');
+    window._fbGP = gp;
+    var _first = true;
+    auth.onAuthStateChanged(function(user){
+      RA.onUser(user, _first);
+      _first = false;
+    });
+  } catch(err) {
+    console.warn('Firebase init failed:', err.message);
+    RA.authReady = true;
+  }
+})();
+</script>
+
+<script src="/static/js/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

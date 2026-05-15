@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Background Remover — RemoveAnything{% endblock %}
+{% block desc %}Remove backgrounds from any image instantly using AI. Transparent, white, or black background output. Free, no signup needed.{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+
+  <div class="hero">
+    <div class="hero-tag anim-up" data-i18n="bg_hero_tag">AI Background Removal</div>
+    <h1 class="display anim-up-1"><span data-i18n="bg_hero_h1a">Background</span><br><em style="color:var(--blue);font-style:normal" data-i18n="bg_hero_h1b">Remover.</em></h1>
+    <p class="hero-sub anim-up-2" data-i18n="bg_hero_sub">AI removes any background in seconds. Transparent, white, or black output at full resolution.</p>
+    <div class="hero-pills anim-up-2">
+      <span class="pill hi" data-i18n="bg_pill1">3 free tries</span>
+      <span class="pill" data-i18n="bg_pill2">Up to 20 MB</span>
+      <span class="pill" data-i18n="bg_pill3">Lossless PNG</span>
+    </div>
+  </div>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-card-head">
+        <span class="tool-card-title" data-i18n="bg_card_title">Background Remover</span>
+        <span class="live-tag" data-i18n="bg_live">live</span>
+      </div>
+
+      <div class="dropzone" id="dz">
+        <div class="dz-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div class="dz-title" data-i18n="dz_title">Drop your image here</div>
+        <div class="dz-sub"><span data-i18n="dz_sub_pre">or</span> <b data-i18n="dz_sub_browse">browse files</b> <span data-i18n="dz_sub_post">· paste works too</span></div>
+        <div class="dz-formats">
+          <span class="fmt-tag">PNG</span>
+          <span class="fmt-tag">JPG</span>
+          <span class="fmt-tag">WebP</span>
+          <span class="fmt-tag">BMP</span>
+          <span class="fmt-tag">TIFF</span>
+        </div>
+        <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp,image/bmp,image/tiff">
+      </div>
+
+      <div class="err-banner" id="err-banner"></div>
+
+      <div class="mode-bar hidden" id="mode-bar">
+        <span class="mode-label" data-i18n="output_label">Output:</span>
+        <button class="mode-btn active" data-mode="transparent" data-i18n="mode_transparent">Transparent</button>
+        <button class="mode-btn" data-mode="white" data-i18n="mode_white">White BG</button>
+        <button class="mode-btn" data-mode="black" data-i18n="mode_black">Black BG</button>
+      </div>
+
+      <div class="workspace" id="workspace">
+        <div class="ws-tabs" id="ws-tabs">
+          <button class="ws-tab active" data-view="view-compare" data-i18n="tab_compare">Compare</button>
+          <button class="ws-tab" data-view="view-original" data-i18n="tab_original">Original</button>
+          <button class="ws-tab" data-view="view-result" data-i18n="tab_result">Result</button>
+        </div>
+
+        <div class="ws-view active" id="view-compare">
+          <div class="compare-grid">
+            <div class="img-panel">
+              <div class="img-panel-label" data-i18n="panel_original">Original</div>
+              <div class="img-display">
+                <img id="orig-img" alt="Original" class="hidden">
+              </div>
+              <div class="img-meta" id="orig-meta"></div>
+            </div>
+            <div class="img-panel">
+              <div class="img-panel-label" data-i18n="panel_result">Result</div>
+              <div class="img-display checker" id="res-display">
+                <div class="result-placeholder" id="res-ph">
+                  <div class="ph-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-dasharray="3 2" stroke="var(--gray-light)" stroke-width="1.5" fill="none"/></svg></div>
+                  <div class="ph-text" data-i18n="ph_text">awaiting processing</div>
+                </div>
+                <img id="res-img" alt="Result" class="hidden">
+                <div class="img-overlay hidden" id="res-overlay">
+                  <div class="spinner"></div>
+                  <div class="overlay-txt" data-i18n="overlay_removing_bg">removing background…</div>
+                </div>
+              </div>
+              <div class="img-meta" id="res-meta"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-view" id="view-original">
+          <div class="single-view">
+            <img id="orig-full" alt="Original">
+            <div class="view-label" data-i18n="panel_original">Original</div>
+          </div>
+        </div>
+
+        <div class="ws-view checker" id="view-result">
+          <div class="single-view">
+            <img id="res-full" alt="Result" class="hidden">
+            <div class="view-label ok" data-i18n="panel_result">Result</div>
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="prog-wrap">
+          <div class="progress-bar" id="prog-bar"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn btn-dark" id="btn-proc" data-i18n="btn_proc_bg">Remove Background</button>
+          <button class="btn btn-blue hidden" id="btn-dl" data-i18n="btn_dl">Download PNG</button>
+          <button class="btn" id="btn-new" data-i18n="btn_new">New Image</button>
+          <div class="spacer"></div>
+          <div class="proc-status" id="proc-stat">
+            <div class="proc-spin"></div>
+            <span data-i18n="processing">processing…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="history-label" data-i18n="hist_label">Recent</div>
+      <div class="history-scroll" id="hist-list">
+        <div class="history-empty" id="hist-empty" data-i18n="hist_empty">Nothing yet — drop an image above</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="wrap">
+      <div class="section-tag" data-i18n="bg_how_tag">How it works</div>
+      <h2 class="display section-title"><span data-i18n="bg_how_h2">Automatic.</span> <em data-i18n="bg_how_h2b">Precise.</em></h2>
+      <div class="steps-grid">
+        <div class="step-card"><span class="step-num" data-i18n="bg_step1_num">Step 01</span><div class="step-title" data-i18n="bg_step1_title">Upload any image</div><div class="step-desc" data-i18n="bg_step1_desc">PNG, JPG, WebP, BMP or TIFF up to 20 MB. Drop, paste or browse.</div></div>
+        <div class="step-card"><span class="step-num" data-i18n="bg_step2_num">Step 02</span><div class="step-title" data-i18n="bg_step2_title">AI detects subject</div><div class="step-desc" data-i18n="bg_step2_desc">Deep learning model identifies foreground subject with edge precision.</div></div>
+        <div class="step-card"><span class="step-num" data-i18n="bg_step3_num">Step 03</span><div class="step-title" data-i18n="bg_step3_title">Choose output</div><div class="step-desc" data-i18n="bg_step3_desc">Transparent PNG, solid white, or solid black background — selected before processing.</div></div>
+        <div class="step-card"><span class="step-num" data-i18n="bg_step4_num">Step 04</span><div class="step-title" data-i18n="bg_step4_title">Download result</div><div class="step-desc" data-i18n="bg_step4_desc">Full-resolution lossless PNG. Zero quality loss.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+'use strict';
+var bgMode = 'transparent';
+
+document.querySelectorAll('#mode-bar .mode-btn').forEach(function(b) {
+  b.addEventListener('click', function() {
+    bgMode = b.dataset.mode;
+    document.querySelectorAll('#mode-bar .mode-btn').forEach(function(x) { x.classList.remove('active'); });
+    b.classList.add('active');
+  });
+});
+
+createToolController({
+  dzId:         'dz',
+  fileInputId:  'file-input',
+  errId:        'err-banner',
+  workspaceId:  'workspace',
+  modebarId:    'mode-bar',
+  btnProcId:    'btn-proc',
+  btnDlId:      'btn-dl',
+  btnNewId:     'btn-new',
+  progWrapId:   'prog-wrap',
+  progBarId:    'prog-bar',
+  statId:       'proc-stat',
+  overlayId:    'res-overlay',
+  origPanelId:  'orig-img',
+  resPanelId:   'res-img',
+  origMetaId:   'orig-meta',
+  resMetaId:    'res-meta',
+  resPHId:      'res-ph',
+  singleOrigId: 'orig-full',
+  singleResId:  'res-full',
+  histListId:   'hist-list',
+  histEmptyId:  'hist-empty',
+  endpoint:     '/remove-bg',
+  dlName:       '_nobg.png',
+  allowedTypes: ['image/png','image/jpeg','image/webp','image/bmp','image/tiff'],
+  maxSize:      20 * 1024 * 1024,
+  tabsId:       'ws-tabs',
+  viewIds:      ['view-compare','view-original','view-result'],
+  extraFormData: function(fd) { fd.append('mode', bgMode); }
+});
+</script>
+{% endblock %}

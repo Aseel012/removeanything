@@ -1,0 +1,33 @@
+# Secrets — NEVER commit these
+.env
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# User uploads / temp files
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+*.log
+
+# OS / IDE
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+node_modules/
+
+# rembg model cache (downloaded at runtime)
+u2net/
+.u2net/

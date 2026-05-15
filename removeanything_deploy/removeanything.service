@@ -1,0 +1,31 @@
+# /etc/systemd/system/removeanything.service
+# Install: sudo cp removeanything.service /etc/systemd/system/
+#          sudo systemctl daemon-reload
+#          sudo systemctl enable removeanything
+#          sudo systemctl start removeanything
+
+[Unit]
+Description=RemoveAnything Flask App
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/removeanything
+EnvironmentFile=/var/www/removeanything/.env
+ExecStart=/var/www/removeanything/venv/bin/gunicorn \
+    --config gunicorn.conf.py \
+    app:app
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=removeanything
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/removeanything/uploads /var/www/removeanything/outputs /tmp
+
+[Install]
+WantedBy=multi-user.target

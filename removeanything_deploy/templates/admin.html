@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin — RemoveAnything</title>
+<link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f8f6;--surface:#fff;--surface2:#f2f2ef;
+  --black:#0e0e0d;--gray:#6b6b67;--gray-l:#a8a8a4;
+  --border:rgba(14,14,13,.1);--border2:rgba(14,14,13,.06);
+  --blue:#2563eb;--blue-l:#eff3fe;
+  --green:#16a34a;--red:#dc2626;--red-l:#fef2f2;
+  --shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 20px 60px rgba(0,0,0,.1);
+  --radius:12px;--radius-sm:8px;
+}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--black);min-height:100vh}
+
+/* ── LOGIN / STEP CARD ── */
+.login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);animation:up .4s ease}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.login-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:3px;color:var(--black)}
+.login-logo em{font-style:normal;color:var(--blue)}
+.login-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray-l);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;display:block}
+.form-err{background:var(--red-l);border:1px solid var(--red);color:var(--red);border-radius:var(--radius-sm);padding:10px 13px;font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--black);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--black);background:var(--surface);outline:none;transition:border-color .15s;margin-bottom:14px}
+.form-input:focus{border-color:var(--blue)}
+.form-btn{width:100%;padding:11px;background:var(--black);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+.form-btn:hover{background:#1c1c1a}
+.back-link{display:block;text-align:center;margin-top:18px;font-size:12px;color:var(--gray-l);text-decoration:none}
+.back-link:hover{color:var(--black)}
+.step-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:var(--blue-l);border:1px solid rgba(37,99,235,.2);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:20px}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;background:#fff;border:1.5px solid #dadce0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#3c4043;cursor:pointer;transition:all .15s;margin-bottom:6px}
+.google-btn:hover{background:#f8f9fa;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.google-btn:disabled{opacity:.6;cursor:not-allowed}
+.info-box{background:var(--blue-l);border:1px solid rgba(37,99,235,.15);border-radius:8px;padding:11px 13px;font-size:12px;color:var(--blue);margin-bottom:16px;line-height:1.5}
+.email-pill{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 11px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.email-pill::before{content:"✓";color:var(--green);font-size:13px;font-weight:700}
+.spin-inline{display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── DASHBOARD ── */
+.anav{position:sticky;top:0;z-index:100;background:rgba(248,248,246,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;gap:12px}
+.anav-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--black);text-decoration:none}
+.anav-logo em{font-style:normal;color:var(--blue)}
+.anav-right{display:flex;align-items:center;gap:10px}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:var(--blue-l);border:1px solid rgba(37,99,235,.2);padding:3px 10px;border-radius:20px}
+.live-badge{background:#f0fdf4;border-color:#bbf7d0;color:var(--green)}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray-l)}
+.logout-btn{font-size:12px;color:var(--gray-l);text-decoration:none;padding:5px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .15s}
+.logout-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+.dash{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+.dash-header{margin-bottom:28px}
+.dash-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:5px}
+.dash-title em{font-style:normal;color:var(--blue)}
+.dash-sub{font-size:13px;color:var(--gray)}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;transition:all .2s}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stat-card.accent{background:var(--black);border-color:var(--black)}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-l);margin-bottom:8px}
+.stat-card.accent .stat-lbl{color:rgba(255,255,255,.4)}
+.stat-val{font-family:'Playfair Display',serif;font-size:34px;color:var(--black);line-height:1}
+.stat-card.accent .stat-val{color:#fff}
+.stat-unit{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray-l);margin-top:3px}
+.stat-card.accent .stat-unit{color:rgba(255,255,255,.35)}
+
+/* ── CHARTS ── */
+.chart-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border2);background:var(--surface2)}
+.chart-title{font-size:13px;font-weight:600}
+.chart-tabs{display:flex;gap:4px}
+.ctab{padding:5px 12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--gray-l);cursor:pointer;transition:all .15s}
+.ctab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.chart-body{padding:16px 18px 18px;overflow-x:auto}
+.bar-wrap{display:flex;align-items:flex-end;gap:3px;height:120px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
+.bar-col-bars{display:flex;gap:1px;align-items:flex-end;width:100%;justify-content:center;height:100px}
+.bar-seg{border-radius:2px 2px 0 0;transition:height .5s ease;min-width:3px;max-width:16px;flex:1;cursor:default;position:relative}
+.bar-seg.b{background:var(--blue)}
+.bar-seg.n{background:var(--green)}
+.bar-col-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--gray-l);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:36px;text-align:center}
+.chart-legend{display:flex;gap:14px;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray)}
+.legend-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+
+/* ── PANEL GRID ── */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+@media(max-width:700px){.panel-grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-head{padding:13px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+.panel-title{font-size:13px;font-weight:600}
+.panel-body{padding:16px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border2)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:12px;color:var(--gray)}
+.info-val{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500}
+.info-val.g{color:var(--green)}
+
+/* ── TABLES ── */
+.section-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.table-wrap{overflow-x:auto;max-height:340px;overflow-y:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-l);text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0;z-index:1}
+td{padding:10px 14px;border-bottom:1px solid var(--border2);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray-l)}
+.cb{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:var(--blue-l);color:var(--blue);font-weight:600}
+.cb.g{background:#f0fdf4;color:#15803d}
+.cb.r{background:var(--red-l);color:var(--red)}
+.empty-row{text-align:center;padding:28px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)}
+.lb{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 8px;border-radius:4px;font-weight:600}
+.lb.bg{background:var(--blue-l);color:var(--blue)}
+.lb.nano{background:#f0fdf4;color:#15803d}
+.search-wrap{padding:10px 14px;border-bottom:1px solid var(--border2)}
+.search-inp{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none;background:var(--surface);color:var(--black)}
+.search-inp:focus{border-color:var(--blue)}
+.rbtn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--gray-l);cursor:pointer;transition:all .15s}
+.rbtn:hover{background:var(--black);color:#fff;border-color:var(--black)}
+.spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+
+@media(max-width:600px){
+  .anav{padding:0 14px}
+  .dash{padding:18px 12px 60px}
+  .dash-title{font-size:26px}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+{% if view == 'login' %}
+<!-- ══ STEP 1: Google Sign-In ══ -->
+<div class="login-shell">
+  <div class="login-card">
+    <div class="login-logo">remove<em>anything</em></div>
+    <span class="login-tag">Admin Panel</span>
+    <div class="step-badge">Step 1 of 2 — Google Verification</div>
+    {% if error %}<div class="form-err">{{ error }}</div>{% endif %}
+    <div class="info-box">
+      Sign in with <strong>shaikhmdaseel@gmail.com</strong> to verify your identity. Then you'll enter your password.
+    </div>
+    <button class="google-btn" id="btn-g" onclick="adminStep1()">
+      <svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.5 1.2 8.9 3.2l6.6-6.6C35.3 2.5 30 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.7 6C12.3 13.3 17.7 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.2-9.4 6.2-16.2z"/>
+        <path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.7-6A23.9 23.9 0 0 0 0 24c0 3.8.9 7.4 2.7 10.7l7.7-6z"/>
+        <path fill="#34A853" d="M24 48c6 0 11-2 14.7-5.4l-7-5.4c-2 1.3-4.5 2.1-7.7 2.1-6.3 0-11.7-3.8-13.6-9.2l-7.7 6C6.6 42.6 14.6 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div id="g-spin" style="display:none;text-align:center;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gray-l)">
+      <span class="spin-inline"></span>Verifying…
+    </div>
+    <div id="g-err" class="form-err" style="display:none;margin-top:8px"></div>
+    <a class="back-link" href="/">← Back to site</a>
+  </div>
+</div>
+
+{% elif view == 'password_step' %}
+<!-- ══ STEP 2: Password ══ -->
+<div class="login-shell">
+  <div class="login-card">
+    <div class="login-logo">remove<em>anything</em></div>
+    <span class="login-tag">Admin Panel</span>
+    <div class="step-badge">Step 2 of 2 — Password</div>
+    {% if error %}<div class="form-err">{{ error }}</div>{% endif %}
+    <div class="email-pill">{{ email }}</div>
+    <div class="info-box" style="margin-bottom:18px">
+      Google identity verified ✓<br>Enter your admin password to access the dashboard.
+    </div>
+    <form method="POST" action="/admin/login" autocomplete="off">
+      <input type="hidden" name="email" value="{{ email }}">
+      <label class="form-label" for="pw">Admin Password</label>
+      <input class="form-input" type="password" id="pw" name="password" placeholder="••••••••" required autocomplete="off">
+      <button class="form-btn" type="submit">Access Dashboard →</button>
+    </form>
+    <a class="back-link" href="/admin/logout">← Cancel &amp; restart</a>
+  </div>
+</div>
+
+{% elif view == 'dashboard' %}
+<!-- ══ DASHBOARD ══ -->
+<nav class="anav">
+  <a class="anav-logo" href="/">remove<em>anything</em></a>
+  <div class="anav-right">
+    <span class="badge">Admin</span>
+    <span class="badge live-badge">● Live</span>
+    <span class="clock" id="clock">—</span>
+    <a class="logout-btn" href="/admin/logout">Log out</a>
+  </div>
+</nav>
+
+<div class="dash">
+  <div class="dash-header">
+    <div class="dash-title">Admin <em>Dashboard</em></div>
+    <div class="dash-sub" id="last-refresh">Loading real-time data…</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-grid">
+    <div class="stat-card accent"><div class="stat-lbl">Total Processed</div><div class="stat-val" id="st-total">—</div><div class="stat-unit">all time</div></div>
+    <div class="stat-card"><div class="stat-lbl">BG Remove</div><div class="stat-val" id="st-bg">—</div><div class="stat-unit">images</div></div>
+    <div class="stat-card"><div class="stat-lbl">Nano Banana</div><div class="stat-val" id="st-nano">—</div><div class="stat-unit">images</div></div>
+    <div class="stat-card"><div class="stat-lbl">Unique Users</div><div class="stat-val" id="st-users">—</div><div class="stat-unit">accounts</div></div>
+    <div class="stat-card"><div class="stat-lbl">Guest IPs</div><div class="stat-val" id="st-ips">—</div><div class="stat-unit">active</div></div>
+    <div class="stat-card"><div class="stat-lbl">API Keys</div><div class="stat-val" id="st-apikeys">—</div><div class="stat-unit">total</div></div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-panel">
+    <div class="chart-head">
+      <span class="chart-title">Usage Over Time</span>
+      <div class="chart-tabs">
+        <button class="ctab active" id="ctab-h" onclick="switchChart('hourly',this)">24 Hours</button>
+        <button class="ctab" id="ctab-d" onclick="switchChart('daily',this)">30 Days</button>
+      </div>
+    </div>
+    <div class="chart-body">
+      <div class="bar-wrap" id="bar-wrap"><div style="color:var(--gray-l);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:20px">Loading…</div></div>
+      <div class="chart-legend">
+        <span><span class="legend-dot" style="background:var(--blue)"></span>BG Remover</span>
+        <span><span class="legend-dot" style="background:var(--green)"></span>Nano Banana</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVER INFO + BREAKDOWN -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Server Info</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-key">Status</span><span class="info-val g" id="srv-status">loading…</span></div>
+        <div class="info-row"><span class="info-key">Uptime</span><span class="info-val" id="srv-uptime">—</span></div>
+        <div class="info-row"><span class="info-key">Server Time (UTC)</span><span class="info-val" id="srv-time">—</span></div>
+        <div class="info-row"><span class="info-key">Active Guest IPs</span><span class="info-val" id="srv-ips">—</span></div>
+        <div class="info-row"><span class="info-key">Signed-in Users</span><span class="info-val" id="srv-users">—</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Tool Breakdown</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-key">Background Remove</span><span class="info-val" id="br-bg">—</span></div>
+        <div class="info-row"><span class="info-key">Nano Banana</span><span class="info-val" id="br-nano">—</span></div>
+        <div class="info-row"><span class="info-key">Total</span><span class="info-val" id="br-total">—</span></div>
+        <div class="info-row"><span class="info-key">BG Share</span><span class="info-val" id="br-bg-pct">—</span></div>
+        <div class="info-row"><span class="info-key">Nano Share</span><span class="info-val" id="br-nano-pct">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="section-panel">
+    <div class="panel-head">
+      <span class="panel-title">Signed-in Users</span>
+      <span class="cb" id="users-badge">0</span>
+    </div>
+    <div class="search-wrap"><input class="search-inp" type="text" id="user-search" placeholder="Search by email…" oninput="filterUsers()"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Email</th><th>Total</th><th>BG</th><th>Nano</th><th>First Seen</th><th>Last Active</th></tr></thead>
+        <tbody id="users-body"><tr><td colspan="6" class="empty-row"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- API KEYS -->
+  <div class="section-panel">
+    <div class="panel-head">
+      <span class="panel-title">API Keys (All Users)</span>
+      <button class="rbtn" onclick="loadStats()">↻ Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>User</th><th>Name</th><th>Status</th><th>Uses</th><th>Last Used</th><th>Created</th></tr></thead>
+        <tbody id="apikeys-body"><tr><td colspan="6" class="empty-row"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="section-panel">
+    <div class="panel-head">
+      <span class="panel-title">Processing Log <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle" title="Live"></span></span>
+      <button class="rbtn" onclick="loadStats()">↻ Refresh</button>
+    </div>
+    <div class="search-wrap"><input class="search-inp" type="text" id="log-search" placeholder="Filter by type, file, email, IP…" oninput="filterLog()"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>File</th><th>In</th><th>Out</th><th>User</th><th>IP</th><th>Time</th></tr></thead>
+        <tbody id="log-body"><tr><td colspan="7" class="empty-row"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /dash -->
+
+<script>
+'use strict';
+var _AU=[], _AL=[], _chartMode='hourly', _chartData={};
+
+function updateClock(){var e=document.getElementById('clock');if(e)e.textContent=new Date().toUTCString().slice(0,25);}
+updateClock(); setInterval(updateClock,1000);
+
+function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function sz(b){if(!b)return'—';if(b<1024)return b+' B';if(b<1048576)return Math.round(b/1024)+' KB';return(b/1048576).toFixed(1)+' MB';}
+function lb(a){
+  if(!a)return'<span class="lb">?</span>';
+  if(a.includes('bg'))return'<span class="lb bg">BG</span>';
+  if(a.includes('nano'))return'<span class="lb nano">Nano</span>';
+  return'<span class="lb">'+e(a)+'</span>';
+}
+
+function drawChart(data){
+  var wrap=document.getElementById('bar-wrap');
+  if(!data||!data.length){wrap.innerHTML='<div style="color:var(--gray-l);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:30px 0">No data yet</div>';return;}
+  var mx=Math.max.apply(null,data.map(function(d){return(d.bg||0)+(d.nano||0)}))||1;
+  var step=Math.ceil(data.length/16);
+  wrap.innerHTML=data.map(function(d,i){
+    var bh=Math.round(((d.bg||0)/mx)*96);
+    var nh=Math.round(((d.nano||0)/mx)*96);
+    return'<div class="bar-col">'
+      +'<div class="bar-col-bars">'
+      +'<div class="bar-seg b" style="height:'+bh+'px" title="BG: '+(d.bg||0)+'"></div>'
+      +'<div class="bar-seg n" style="height:'+nh+'px" title="Nano: '+(d.nano||0)+'"></div>'
+      +'</div>'
+      +'<div class="bar-col-lbl">'+(i%step===0?e(d.label):'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function switchChart(mode,btn){
+  _chartMode=mode;
+  document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  drawChart(_chartData[mode]);
+}
+
+async function loadStats(){
+  try{
+    var r=await fetch('/admin/stats',{credentials:'include'});
+    if(!r.ok){if(r.status===401||r.status===403){window.location='/admin';return;}return;}
+    var d=await r.json();
+
+    document.getElementById('st-total').textContent=d.total??'—';
+    document.getElementById('st-bg').textContent=d.total_bg??'—';
+    document.getElementById('st-nano').textContent=d.total_nano??'—';
+    document.getElementById('st-users').textContent=d.users?d.users.length:'0';
+    document.getElementById('st-ips').textContent=d.active_ips??'—';
+    document.getElementById('st-apikeys').textContent=d.total_api_keys??'—';
+
+    document.getElementById('srv-status').textContent='Online ✓';
+    document.getElementById('srv-uptime').textContent=d.uptime||'—';
+    document.getElementById('srv-time').textContent=d.server_time||'—';
+    document.getElementById('srv-ips').textContent=d.active_ips??'—';
+    document.getElementById('srv-users').textContent=d.users?d.users.length:'0';
+
+    var tot=d.total||0;
+    document.getElementById('br-bg').textContent=d.total_bg||0;
+    document.getElementById('br-nano').textContent=d.total_nano||0;
+    document.getElementById('br-total').textContent=tot;
+    document.getElementById('br-bg-pct').textContent=tot>0?Math.round(((d.total_bg||0)/tot)*100)+'%':'—';
+    document.getElementById('br-nano-pct').textContent=tot>0?Math.round(((d.total_nano||0)/tot)*100)+'%':'—';
+
+    _chartData.hourly=d.hourly_chart||[];
+    _chartData.daily=d.daily_chart||[];
+    drawChart(_chartData[_chartMode]);
+
+    _AU=d.users||[];
+    document.getElementById('users-badge').textContent=_AU.length+' users';
+    renderUsers(_AU);
+    renderApiKeys(d.api_keys||[]);
+
+    _AL=d.log||[];
+    renderLog(_AL);
+
+    var lr=document.getElementById('last-refresh');
+    if(lr)lr.textContent='Last updated: '+new Date().toLocaleTimeString()+' · Auto-refreshes every 15s';
+  }catch(err){console.error(err);}
+}
+
+function renderUsers(users){
+  var tb=document.getElementById('users-body');
+  if(!users.length){tb.innerHTML='<tr><td colspan="6" class="empty-row">No signed-in users yet</td></tr>';return;}
+  tb.innerHTML=users.map(function(u){
+    return'<tr>'
+      +'<td style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e(u.email||'—')+'</td>'
+      +'<td><span class="cb">'+(u.count||0)+'</span></td>'
+      +'<td style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:var(--blue)">'+(u.bg||0)+'</td>'
+      +'<td style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:var(--green)">'+(u.nano||0)+'</td>'
+      +'<td class="mono">'+e(u.first_seen||'—')+'</td>'
+      +'<td class="mono">'+e(u.last_seen||'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function renderApiKeys(keys){
+  var tb=document.getElementById('apikeys-body');
+  if(!keys.length){tb.innerHTML='<tr><td colspan="6" class="empty-row">No API keys yet</td></tr>';return;}
+  tb.innerHTML=keys.map(function(k){
+    var sc=k.active?'g':'r';
+    return'<tr>'
+      +'<td class="mono" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e(k.email||'—')+'</td>'
+      +'<td style="font-size:12px;font-weight:500">'+e(k.name||'—')+'</td>'
+      +'<td><span class="cb '+sc+'">'+(k.active?'Active':'Off')+'</span></td>'
+      +'<td><span class="cb">'+k.uses+'</span></td>'
+      +'<td class="mono">'+e(k.last_used||'—')+'</td>'
+      +'<td class="mono">'+e(k.created||'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function renderLog(log){
+  var tb=document.getElementById('log-body');
+  if(!log.length){tb.innerHTML='<tr><td colspan="7" class="empty-row">No processing log yet</td></tr>';return;}
+  tb.innerHTML=log.map(function(l){
+    return'<tr>'
+      +'<td>'+lb(l.action)+'</td>'
+      +'<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">'+e(l.filename||'—')+'</td>'
+      +'<td class="mono">'+sz(l.size_in)+'</td>'
+      +'<td class="mono">'+sz(l.size_out)+'</td>'
+      +'<td class="mono" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e(l.email||'guest')+'</td>'
+      +'<td class="mono">'+e(l.ip||'—')+'</td>'
+      +'<td class="mono" style="white-space:nowrap">'+e(l.ts||'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function filterUsers(){
+  var q=(document.getElementById('user-search').value||'').toLowerCase();
+  renderUsers(q?_AU.filter(function(u){return(u.email||'').toLowerCase().includes(q);}):_AU);
+}
+function filterLog(){
+  var q=(document.getElementById('log-search').value||'').toLowerCase();
+  renderLog(q?_AL.filter(function(l){return(l.action||'').includes(q)||(l.filename||'').toLowerCase().includes(q)||(l.ip||'').includes(q)||(l.email||'').toLowerCase().includes(q);}):_AL);
+}
+
+loadStats();
+setInterval(loadStats,15000);
+</script>
+{% endif %}
+
+{% if view in ['login','password_step'] %}
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  try{
+    var cfg={{ firebase_config|tojson }};
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    var auth=firebase.auth(); window._fbAdminAuth=auth;
+    var gp=new firebase.auth.GoogleAuthProvider();
+    gp.setCustomParameters({prompt:'select_account',login_hint:'shaikhmdaseel@gmail.com'});
+    window._fbAdminGP=gp;
+  }catch(err){console.warn('Firebase init:',err.message);}
+})();
+
+function adminStep1(){
+  var btn=document.getElementById('btn-g');
+  var spin=document.getElementById('g-spin');
+  var errDiv=document.getElementById('g-err');
+  if(!window._fbAdminAuth||!window._fbAdminGP){
+    errDiv.textContent='Auth not ready. Refresh and try again.';
+    errDiv.style.display='block'; return;
+  }
+  btn.disabled=true; btn.style.display='none';
+  spin.style.display='block'; errDiv.style.display='none';
+
+  window._fbAdminAuth.signInWithPopup(window._fbAdminGP)
+    .then(function(result){
+      return result.user.getIdToken(true).then(function(tok){
+        return fetch('/auth/verify',{method:'POST',credentials:'include',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({idToken:tok})});
+      });
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.needs_admin_password){
+        /* Reload /admin — Flask will see google_authed_admin in session and show password_step */
+        window.location.href='/admin';
+      } else {
+        errDiv.textContent=d.error||'This Google account is not authorised as admin.';
+        errDiv.style.display='block';
+        btn.disabled=false; btn.style.display='flex'; spin.style.display='none';
+      }
+    })
+    .catch(function(err){
+      if(err.code!=='auth/popup-closed-by-user'){
+        errDiv.textContent=err.message||'Sign-in failed.';
+        errDiv.style.display='block';
+      }
+      btn.disabled=false; btn.style.display='flex'; spin.style.display='none';
+    });
+}
+</script>
+{% endif %}
+
+</body>
+</html>
